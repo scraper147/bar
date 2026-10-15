@@ -1,0 +1,155 @@
+{
+  "format": "caisse-bar/catalogue",
+  "formatVersion": 1,
+  "version": 1,
+  "date": "2026-10-14",
+  "exemple": true,
+  "pointsDeVente": [
+    {
+      "id": "pdv1",
+      "nom": "Bar 1",
+      "actif": true
+    },
+    {
+      "id": "pdv2",
+      "nom": "Bar 2",
+      "actif": true
+    }
+  ],
+  "categories": [
+    {
+      "id": "soft",
+      "nom": "Softs",
+      "ordre": 1,
+      "actif": true,
+      "prefixe": false,
+      "produits": [
+        {
+          "id": "s1",
+          "libelle": "Eau plate",
+          "prix": 2,
+          "ordre": 1,
+          "actif": true
+        },
+        {
+          "id": "s2",
+          "libelle": "Eau pétillante",
+          "prix": 2,
+          "ordre": 2,
+          "actif": true
+        },
+        {
+          "id": "s3",
+          "libelle": "Cola",
+          "prix": 2.5,
+          "ordre": 3,
+          "actif": true
+        },
+        {
+          "id": "s4",
+          "libelle": "Jus d’orange",
+          "prix": 2.5,
+          "ordre": 4,
+          "actif": true
+        }
+      ]
+    },
+    {
+      "id": "biere",
+      "nom": "Bières",
+      "ordre": 2,
+      "actif": true,
+      "prefixe": false,
+      "produits": [
+        {
+          "id": "b1",
+          "libelle": "Bière pression 25 cl",
+          "prix": 2.5,
+          "ordre": 1,
+          "actif": true
+        },
+        {
+          "id": "b2",
+          "libelle": "Bière pression 50 cl",
+          "prix": 4.5,
+          "ordre": 2,
+          "actif": true
+        },
+        {
+          "id": "b3",
+          "libelle": "Bière spéciale",
+          "prix": 4,
+          "ordre": 3,
+          "actif": true
+        }
+      ]
+    },
+    {
+      "id": "vin",
+      "nom": "Vins",
+      "ordre": 3,
+      "actif": true,
+      "prefixe": false,
+      "produits": [
+        {
+          "id": "v1",
+          "libelle": "Verre de vin rouge",
+          "prix": 4,
+          "ordre": 1,
+          "actif": true
+        },
+        {
+          "id": "v2",
+          "libelle": "Verre de vin blanc",
+          "prix": 4,
+          "ordre": 2,
+          "actif": true
+        },
+        {
+          "id": "v3",
+          "libelle": "Verre de rosé",
+          "prix": 4,
+          "ordre": 3,
+          "actif": true
+        },
+        {
+          "id": "v4",
+          "libelle": "Bouteille de vin",
+          "prix": 18,
+          "ordre": 4,
+          "actif": true
+        }
+      ]
+    },
+    {
+      "id": "chaud",
+      "nom": "Boissons chaudes",
+      "ordre": 4,
+      "actif": true,
+      "prefixe": false,
+      "produits": [
+        {
+          "id": "c1",
+          "libelle": "Café",
+          "prix": 2,
+          "ordre": 1,
+          "actif": true
+        },
+        {
+          "id": "c2",
+          "libelle": "Thé",
+          "prix": 2,
+          "ordre": 2,
+          "actif": true
+        },
+        {
+          "id": "c3",
+          "libelle": "Chocolat chaud",
+          "prix": 2.5,
+          "ordre": 3,
+          "actif": true
+        }
+      ]
+    }
+  ]
+}
