@@ -30,6 +30,13 @@ Caisse de vente de boissons pour tablette ou smartphone Android. Elle fonctionne
 
 À partir de là, l'app fonctionne sans internet.
 
+## Ajouter un article depuis l'app
+
+Menu **⋮ → Ajouter un article au catalogue** : choisir une catégorie (ou en créer une), saisir le libellé et le prix, puis **Créer l'article**.
+- L'app affiche l'**ID** de l'article (et de la catégorie si elle est nouvelle). Pour avoir le même article sur un autre appareil, créez-le là-bas avec **exactement le même ID** (champ « ID de l'article »).
+- Ces articles sont propres à l'appareil et sont **gardés** lors des mises à jour de `catalogue.json`. Si le catalogue officiel contient un jour le même ID, c'est la version officielle qui est utilisée.
+- Pour corriger une erreur : supprimer l'article dans la même fenêtre, puis le recréer. Les ventes déjà faites ne changent pas.
+
 ## Tablette ou smartphone
 
 L'app choisit seule sa présentation au démarrage, selon la taille de l'écran :
@@ -67,7 +74,7 @@ Le bouton **Paramètres de la tablette → Vérifier les mises à jour** force l
 
 Les caisses du compte partagent l'adresse `scraper147.github.io` (caisse sapins dans `/sapin/`, Caisse Bar dans `/bar/`). Pour qu'elles cohabitent :
 - clés de stockage propres : `bar-caisse`, `bar-caisse-catalogue` ;
-- cache hors ligne propre, préfixé `caisse-bar-` (actuellement `caisse-bar-v9`) : une mise à jour de la Caisse Bar ne supprime que ses anciens caches, jamais ceux de la caisse sapins ;
+- cache hors ligne propre, préfixé `caisse-bar-` (actuellement `caisse-bar-v10`) : une mise à jour de la Caisse Bar ne supprime que ses anciens caches, jamais ceux de la caisse sapins ;
 - icône « Caisse Bar », `start_url` et `scope` limités à `./` (le dossier `/bar/`).
 
-Pour une mise à jour, augmentez uniquement le numéro dans `sw.js` (`var CACHE = PREFIX + 'v10';`), sans changer le préfixe.
+Pour une mise à jour, augmentez uniquement le numéro dans `sw.js` (`var CACHE = PREFIX + 'v11';`), sans changer le préfixe.

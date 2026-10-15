@@ -195,6 +195,13 @@ pre.json{flex:1;margin:0;overflow:auto;background:#151B12;color:#E4EBDC;border-r
 .phone .paymodal .bill{height:62px;font-size:19px}
 .phone .paymodal .modes .mode{height:56px}
 .phone:not(.framed) .overlay:has(.paymodal){padding-top:0}
+.addcat>*{flex-shrink:0}
+.nacats{display:flex;flex-wrap:wrap;gap:8px}
+.nacats .choice{height:46px;padding:0 16px;font-size:16px}
+.idv{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:800;background:var(--soft,#EEF2E8);padding:1px 6px;border-radius:6px;user-select:all}
+.naitem{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.naitem .btn{flex-shrink:0;height:44px}
+.phone .addcat .grid2{grid-template-columns:1fr}
 </style>
 </head>
 <body>
@@ -207,6 +214,41 @@ var LOGO_TEXT = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMD
 
 /* ---------- Catalogue ---------- */
 var CAT_KEY = 'bar-caisse-catalogue';
+
+/* Articles créés dans l'app (menu ⋮ → Ajouter un article). Gardés à part du catalogue officiel :
+   une mise à jour de catalogue.json ne les efface pas. Si le catalogue officiel contient un jour le même ID,
+   c'est la version officielle qui est utilisée. */
+var ADD_KEY = STORE_KEY + '-ajouts';
+var LOCAL = { produits: [] };
+try { var lx = JSON.parse(localStorage.getItem(ADD_KEY)); if (lx && Array.isArray(lx.produits)) LOCAL = lx; } catch (e) {}
+function withLocal(cat) {
+  var ids = {};
+  cat.categories.forEach(function (k) { k.produits.forEach(function (p) { ids[p.id] = 1; }); });
+  LOCAL.produits.forEach(function (lp) {
+    if (ids[lp.id]) return; ids[lp.id] = 1;
+    var k = cat.categories.filter(function (c) { return c.id === lp.cat.id; })[0];
+    if (!k) { k = { id: lp.cat.id, nom: lp.cat.nom, prefixe: false, produits: [] }; cat.categories.push(k); }
+    k.produits.push({ id: lp.id, libelle: lp.libelle, prix: lp.prix, local: true });
+  });
+  return cat;
+}
+function allProductIds() { var o = {}; if (CATALOGUE) CATALOGUE.categories.forEach(function (k) { k.produits.forEach(function (p) { o[p.id] = p; }); }); return o; }
+function rebuildCatalogue() {
+  try { CATALOGUE = normalizeCatalogue(JSON.parse(localStorage.getItem(CAT_KEY))); }
+  catch (e) {
+    var keep = {}; LOCAL.produits.forEach(function (lp) { keep[lp.id] = 1; });
+    CATALOGUE.categories.forEach(function (k) { k.produits = k.produits.filter(function (p) { return !p.local || keep[p.id]; }); });
+    CATALOGUE.categories = CATALOGUE.categories.filter(function (k) { return k.produits.length; });
+    withLocal(CATALOGUE);
+  }
+  if (!CATALOGUE.categories.some(function (k) { return k.id === S.cat; })) S.cat = CATALOGUE.categories[0].id;
+}
+function saveLocal() {
+  try { localStorage.setItem(ADD_KEY, JSON.stringify(LOCAL)); refreshUsage(); return true; }
+  catch (e) { S.modal = 'storage'; refreshUsage(); return false; }
+}
+var ID_RE = /^[a-z0-9][a-z0-9_-]{0,39}$/;
+function uniqueId(base, taken) { base = base || 'article'; var id = base, n = 2; while (taken[id]) id = base + '-' + n++; return id; }
 
 // Vérifie un catalogue et le prépare pour la caisse (filtre "actif", trie par "ordre").
 function normalizeCatalogue(c) {
@@ -233,7 +275,7 @@ function normalizeCatalogue(c) {
   }).filter(function (k) { return k.produits.length; });
   if (!pdv.length) throw new Error('Aucun point de vente actif.');
   if (!cats.length) throw new Error('Aucun produit actif.');
-  return { version: Number(c.version) || 0, date: String(c.date || ''), exemple: !!c.exemple, pointsDeVente: pdv, categories: cats };
+  return withLocal({ version: Number(c.version) || 0, date: String(c.date || ''), exemple: !!c.exemple, pointsDeVente: pdv, categories: cats });
 }
 var CATALOGUE;
 try { CATALOGUE = normalizeCatalogue(JSON.parse(localStorage.getItem(CAT_KEY))); } catch (e) { CATALOGUE = null; }
@@ -368,6 +410,28 @@ var A = {
     if (S.placeId && !findPlace(S.placeId)) { S.placeId = null; S.pending = null; persist(); }
     if (S.pending && !findPlace(S.pending)) S.pending = null;
     toast(catalogueLabel(CATALOGUE) + ' installé');
+  },
+  openAddCat: function () {
+    S.menu = false; S.modal = 'addcat'; S.naCat = S.cat; S.naCatName = ''; S.naCatId = ''; S.naLabel = ''; S.naPrice = ''; S.naId = ''; S.naDone = null; S.naDel = null;
+  },
+  naCat: function (v) { S.naCat = v; S.naDone = null; },
+  createItem: function () {
+    var f = addForm(); if (f.err) return;
+    LOCAL.produits.push({ id: f.id, cat: { id: f.catId, nom: f.catNom }, libelle: f.label, prix: f.price, cree: isoLocal(new Date()) });
+    if (!saveLocal()) { LOCAL.produits.pop(); return; }
+    rebuildCatalogue();
+    S.naDone = { id: f.id, label: f.label, catId: f.catId, catNom: f.catNom, newCat: f.newCat };
+    if (f.newCat) S.naCat = f.catId;
+    S.naLabel = ''; S.naPrice = ''; S.naId = ''; S.naCatName = ''; S.naCatId = '';
+  },
+  askDelItem: function (id) { S.naDel = id; },
+  delItem: function (id) {
+    LOCAL.produits = LOCAL.produits.filter(function (lp) { return lp.id !== id; });
+    if (!saveLocal()) return;
+    S.naDel = null; S.naDone = null;
+    rebuildCatalogue();
+    if (S.naCat !== '__new' && !CATALOGUE.categories.some(function (k) { return k.id === S.naCat; })) S.naCat = CATALOGUE.categories[0].id;
+    toast('Article supprimé de cet appareil');
   },
   openPay: function () { S.modal = 'pay'; S.payMode = 'cash'; S.received = ''; S.mix = ''; },
   mode: function (m) { S.payMode = m; },
@@ -543,7 +607,7 @@ function vHist() {
   return html + '</div></div>';
 }
 
-function vMenu() { return (S.menu ? '<div class="menu"><button data-a="download">Exporter / partager les ventes du jour</button><button data-a="showJson">Voir le fichier JSON du jour</button><button data-a="showDays">Ventes des jours précédents</button><button data-a="goHome">Retour à l\'accueil</button><div class="meta">' + catalogueLabel(CATALOGUE) + '</div></div>' : ''); }
+function vMenu() { return (S.menu ? '<div class="menu"><button data-a="download">Exporter / partager les ventes du jour</button><button data-a="showJson">Voir le fichier JSON du jour</button><button data-a="showDays">Ventes des jours précédents</button><button data-a="openAddCat">Ajouter un article au catalogue</button><button data-a="goHome">Retour à l\'accueil</button><div class="meta">' + catalogueLabel(CATALOGUE) + '</div></div>' : ''); }
 function vPosPhone(d, p) {
   return '<div class="full"><div class="header"><img src="' + LOGO_TEXT + '" alt="Chlorophylle Night"><div style="flex:1"></div>' +
     '<button class="iconbtn" data-a="toggleTheme" aria-label="' + (isDark() ? 'Mode clair' : 'Mode sombre') + '">' + (isDark() ? ICON_SUN : ICON_MOON) + '</button>' +
@@ -563,6 +627,60 @@ function vPos() {
     '<button class="iconbtn" data-a="toggleTheme" aria-label="' + (isDark() ? 'Mode clair' : 'Mode sombre') + '">' + (isDark() ? ICON_SUN : ICON_MOON) + '</button>' + '<button class="iconbtn" data-a="toggleMenu" aria-label="Menu">' + ICON_DOTS + '</button></div>' +
     vStorageBar() + (S.tab === 'caisse' ? vCaisse() : vHist()) + '</div>' +
     vMenu();
+}
+
+function addForm() {
+  var cats = {}; CATALOGUE.categories.forEach(function (k) { cats[k.id] = k; });
+  var newCat = S.naCat === '__new', r = { newCat: newCat };
+  if (newCat) {
+    r.catNom = (S.naCatName || '').trim();
+    r.catSug = uniqueId(slug(r.catNom), cats);
+    r.catId = (S.naCatId || '').trim().toLowerCase() || r.catSug;
+  } else { var k = cats[S.naCat] || CATALOGUE.categories[0]; r.catId = k.id; r.catNom = k.nom; }
+  r.label = (S.naLabel || '').trim(); r.price = r2(num(S.naPrice));
+  r.sug = uniqueId(slug((newCat ? r.catNom : r.catNom) + ' ' + r.label), allProductIds());
+  r.id = (S.naId || '').trim().toLowerCase() || r.sug;
+  if (newCat && !r.catNom) r.err = 'Donnez un nom à la nouvelle catégorie.';
+  else if (newCat && !ID_RE.test(r.catId)) r.err = 'ID de catégorie invalide : lettres minuscules, chiffres, tirets (40 caractères max).';
+  else if (newCat && cats[r.catId]) r.err = 'La catégorie « ' + r.catId + ' » existe déjà : choisissez-la dans la liste.';
+  else if (!r.label) r.err = 'Indiquez le libellé de l\u2019article.';
+  else if (!(r.price > 0)) r.err = 'Indiquez un prix supérieur à 0.';
+  else if (!ID_RE.test(r.id)) r.err = 'ID d\u2019article invalide : lettres minuscules, chiffres, tirets (40 caractères max).';
+  else if (allProductIds()[r.id]) r.err = 'L\u2019ID « ' + r.id + ' » est déjà utilisé.';
+  return r;
+}
+
+function vAddCat() {
+  var f = addForm(), ids = allProductIds(), typed = (S.naLabel || S.naPrice || S.naCatName);
+  var html = '<div class="overlay"><div class="modal addcat" style="width:min(680px,96vw)"><div class="row"><h2>Ajouter un article</h2><button class="btn" data-a="close" style="height:44px">Fermer</button></div>';
+  if (S.naDone) {
+    html += '<div class="result" style="display:block;line-height:1.5;font-size:17px">✓ « ' + esc(S.naDone.label) + ' » ajouté.<br>ID de l\u2019article : <strong class="idv">' + esc(S.naDone.id) + '</strong>' +
+      (S.naDone.newCat ? '<br>Nouvelle catégorie « ' + esc(S.naDone.catNom) + ' », ID : <strong class="idv">' + esc(S.naDone.catId) + '</strong>' : '') +
+      '<div class="sub" style="margin-top:4px">Sur un autre appareil, créez le même article avec exactement ce' + (S.naDone.newCat ? 's IDs' : 't ID') + '.</div></div>';
+  }
+  html += '<div class="sub" style="font-weight:700">Catégorie</div><div class="nacats">' +
+    CATALOGUE.categories.map(function (k) { return '<button class="choice' + (S.naCat === k.id ? ' on' : '') + '" data-a="naCat" data-v="' + esc(k.id) + '">' + esc(k.nom) + '</button>'; }).join('') +
+    '<button class="choice' + (f.newCat ? ' on' : '') + '" data-a="naCat" data-v="__new">+ Nouvelle catégorie</button></div>';
+  if (f.newCat) {
+    html += '<div class="grid2"><label class="f">Nom de la catégorie<input type="text" data-f="naCatName" value="' + esc(S.naCatName || '') + '" placeholder="ex. Cocktails" autocomplete="off"></label>' +
+      '<label class="f">ID de la catégorie<input type="text" data-f="naCatId" value="' + esc(S.naCatId || '') + '" placeholder="' + esc(f.catNom ? f.catSug : 'automatique') + '" autocomplete="off" autocapitalize="none" spellcheck="false"></label></div>';
+  }
+  html += '<div class="grid2"><label class="f">Libellé<input type="text" data-f="naLabel" value="' + esc(S.naLabel || '') + '" placeholder="ex. Mojito" autocomplete="off"></label>' +
+    '<label class="f">Prix (€)<input type="text" inputmode="decimal" data-f="naPrice" value="' + esc(S.naPrice || '') + '" placeholder="0,00" autocomplete="off"></label></div>' +
+    '<label class="f">ID de l\u2019article <span style="font-weight:400">(laisser vide pour l\u2019ID proposé, ou saisir celui créé sur un autre appareil)</span><input type="text" data-f="naId" value="' + esc(S.naId || '') + '" placeholder="' + esc(f.label ? f.sug : 'automatique') + '" autocomplete="off" autocapitalize="none" spellcheck="false"></label>' +
+    (typed && f.err ? '<div class="sub" style="color:var(--red);font-weight:700">' + esc(f.err) + '</div>' : '') +
+    '<button class="btn btn-primary" data-a="createItem"' + (f.err ? ' disabled' : '') + ' style="height:58px;font-size:19px">Créer l\u2019article' + (f.err ? '' : ' · ID ' + esc(f.id)) + '</button>';
+  var mine = LOCAL.produits;
+  html += '<div class="sub" style="font-weight:700;margin-top:6px">Articles ajoutés sur cet appareil (' + mine.length + ')</div>';
+  if (!mine.length) html += '<div class="sub">Aucun pour l\u2019instant. Ils sont gardés lors des mises à jour du catalogue.</div>';
+  html += mine.map(function (lp) {
+    var official = ids[lp.id] && !ids[lp.id].local;
+    return '<div class="naitem"><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><strong>' + esc(lp.libelle) + ' · ' + money(lp.prix) + '</strong>' +
+      '<span class="sub">' + esc(lp.cat.nom) + ' · ID <span class="idv">' + esc(lp.id) + '</span>' + (official ? ' · <em>remplacé par le catalogue officiel</em>' : '') + '</span></div>' +
+      (S.naDel === lp.id ? '<button class="btn btn-danger" data-a="delItem" data-v="' + esc(lp.id) + '" style="border:1px solid var(--red)">Confirmer</button>'
+        : '<button class="btn btn-danger" data-a="askDelItem" data-v="' + esc(lp.id) + '">Supprimer</button>') + '</div>';
+  }).join('');
+  return html + '</div></div>';
 }
 
 function vFree() {
@@ -668,6 +786,7 @@ function render() {
   else if (S.modal === 'json') html += vJson();
   else if (S.modal === 'days') html += vDays();
   else if (S.modal === 'storage') html += vStorage();
+  else if (S.modal === 'addcat') html += vAddCat();
   else if (S.modal === 'import') html += vImport();
   if (S.toast) html += '<div class="toast">' + esc(S.toast) + '</div>';
   app.innerHTML = html;
