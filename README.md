@@ -6,7 +6,7 @@ Caisse de vente de boissons pour tablette ou smartphone Android. Elle fonctionne
 
 1. Connectez-vous sur https://github.com.
 2. Cliquez sur **New** (nouveau dépôt) :
-   - Repository name : `caisse-bar`
+   - Repository name : `bar`
    - Cochez **Public**
    - Cliquez sur **Create repository**
 3. Sur la page du dépôt, cliquez sur **uploading an existing file** (ou **Add file → Upload files**).
@@ -18,7 +18,7 @@ Caisse de vente de boissons pour tablette ou smartphone Android. Elle fonctionne
    - Branch : **main**, dossier **/ (root)**
    - Cliquez sur **Save**
 7. Attendez 1 à 2 minutes. L'adresse s'affiche en haut de la page Pages :
-   `https://<votre-compte>.github.io/caisse-bar/`
+   `https://scraper147.github.io/bar/`
 
 ## Installation sur une tablette ou un smartphone
 
@@ -65,5 +65,9 @@ Le bouton **Paramètres de la tablette → Vérifier les mises à jour** force l
 
 ## Important si la caisse sapins est sur le même compte GitHub
 
-Cette caisse utilise ses propres clés de stockage (`bar-caisse`, `bar-caisse-catalogue`) et son propre cache (`caisse-bar-v7`).
-Les deux apps peuvent donc être installées sur la même tablette sans mélanger ventes ni catalogue.
+Les caisses du compte partagent l'adresse `scraper147.github.io` (caisse sapins dans `/sapin/`, Caisse Bar dans `/bar/`). Pour qu'elles cohabitent :
+- clés de stockage propres : `bar-caisse`, `bar-caisse-catalogue` ;
+- cache hors ligne propre, préfixé `caisse-bar-` (actuellement `caisse-bar-v8`) : une mise à jour de la Caisse Bar ne supprime que ses anciens caches, jamais ceux de la caisse sapins ;
+- icône « Caisse Bar », `start_url` et `scope` limités à `./` (le dossier `/bar/`).
+
+Pour une mise à jour, augmentez uniquement le numéro dans `sw.js` (`var CACHE = PREFIX + 'v9';`), sans changer le préfixe.
