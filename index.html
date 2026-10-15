@@ -151,7 +151,7 @@ pre.json{flex:1;margin:0;overflow:auto;background:#151B12;color:#E4EBDC;border-r
 .phone .modal .row>span{font-size:30px !important}
 .phone .actions{flex-wrap:wrap}
 .phone .actions .btn{flex:1;padding:0 14px;height:54px !important;font-size:17px !important}
-.phone .modes .mode{height:52px;font-size:16px}
+.phone .modes .mode{height:52px;font-size:clamp(13px,4vw,16px);padding:0 2px;min-width:0;white-space:nowrap}
 .phone .bills{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .phone .bill{height:52px;font-size:18px}
 .phone .result{padding:12px 14px}.phone .result span{font-size:26px}
@@ -554,7 +554,7 @@ function vPay() {
       '<div style="display:flex;gap:12px;align-items:flex-end"><label class="f" style="flex:1">Montant reçu (€)<input type="text" inputmode="decimal" data-f="received" value="' + esc(S.received) + '" placeholder="0,00" autocomplete="off"></label><button class="btn btn-danger" data-a="resetReceived">Effacer</button></div>' +
       '<div class="result' + (ch >= -0.001 ? '' : ' ko') + '"><b>' + (ch >= -0.001 ? 'À rendre' : 'Il manque') + '</b><span>' + money(Math.abs(ch)) + '</span></div>';
   } else if (S.payMode === 'bc') {
-    html += '<div class="result" style="font-size:18px">Encaissez <strong>&nbsp;' + money(t) + '&nbsp;</strong> sur le terminal, puis validez.</div>';
+    html += '<div class="result" style="display:block;font-size:18px;line-height:1.5">Encaissez <strong style="white-space:nowrap;font-size:1.25em">' + money(t) + '</strong> sur le terminal, puis validez.</div>';
   } else {
     html += '<div class="sub" style="font-weight:700">Billets reçus (part cash)</div><div class="bills" style="grid-template-columns:repeat(5,minmax(0,1fr))">' +
       BILLS.map(function (b) { return '<button class="bill" data-a="bill" data-v="' + b + '">' + b + ' €</button>'; }).join('') + '</div>' +

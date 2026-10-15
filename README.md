@@ -63,5 +63,5 @@ Le bouton **Paramètres de la tablette → Vérifier les mises à jour** force l
 
 ## Important si la caisse sapins est sur le même compte GitHub
 
-Cette caisse utilise ses propres clés de stockage (`bar-caisse`, `bar-caisse-catalogue`) et son propre cache (`caisse-bar-v4`).
+Cette caisse utilise ses propres clés de stockage (`bar-caisse`, `bar-caisse-catalogue`) et son propre cache (`caisse-bar-v5`).
 Les deux apps peuvent donc être installées sur la même tablette sans mélanger ventes ni catalogue.
