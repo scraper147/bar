@@ -172,6 +172,16 @@ pre.json{flex:1;margin:0;overflow:auto;background:#151B12;color:#E4EBDC;border-r
 .framed body{display:flex;align-items:center;justify-content:center;background:#C9CCC4}
 .framed[data-theme="dark"] body{background:#050705}
 .framed #app{width:390px;height:min(844px,calc(100% - 32px));border-radius:36px;border:10px solid #111;box-shadow:0 20px 60px rgba(0,0,0,.35);background:var(--ground)}
+.memwarn{display:block;width:100%;flex-shrink:0;border:none;background:var(--warn-bg);color:var(--warn-text);font-size:15px;font-weight:700;padding:10px 16px;text-align:center}
+.center .memwarn{width:auto;max-width:min(560px,92%);border-radius:12px}
+.memgauge{display:flex;flex-direction:column;gap:6px;font-size:15px}
+.memgauge .bar{height:10px;border-radius:5px;background:var(--soft);overflow:hidden}
+.memgauge .bar i{display:block;height:100%}
+.dayact{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.phone .dayact{flex-wrap:wrap;justify-content:flex-end}
+.actions.stack{flex-wrap:wrap}
+.phone .actions.stack{flex-direction:column-reverse}
+.phone .actions.stack .btn{width:100%;flex:none}
 </style>
 </head>
 <body>
@@ -242,7 +252,7 @@ var S = {
   screen: 'home', tab: 'caisse', menu: false, placeId: null, pending: null, openedDate: null,
   cat: CATALOGUE ? CATALOGUE.categories[0].id : null, cart: [], ticketDisc: null, modal: null,
   discTarget: null, discType: '%', discVal: '', freeLabel: '', freePrice: '',
-  payMode: 'cash', received: '', mix: '', days: {}, toast: '', cartOpen: false
+  payMode: 'cash', received: '', mix: '', days: {}, toast: '', exported: {}, usedPct: 0, confirmDel: null, cartOpen: false
 };
 // Mémoire locale (simule le fichier de la tablette)
 try {
@@ -252,11 +262,20 @@ try {
     S.openedDate = saved.openedDate || null;
     // Ventes par jour : { "AAAA-MM-JJ": [ventes] } (reprise de l'ancien format à un seul jour)
     S.days = saved.days || {};
+    S.exported = saved.exported || {};
     if (saved.sales && saved.sales.length && saved.salesDate && !S.days[saved.salesDate]) S.days[saved.salesDate] = saved.sales;
   }
 } catch (e) {}
+/* Mémoire de l'appareil : ~5 millions de caractères pour toute l'adresse <compte>.github.io (partagée entre les caisses) */
+var STORAGE_LIMIT = 5000000;
+function storageUsed() { var n = 0; try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); n += k.length + (localStorage.getItem(k) || '').length; } } catch (e) {} return n; }
+function storageMo(n) { return (n / 1000000).toFixed(1).replace('.', ',') + ' Mo'; }
+function refreshUsage() { S.usedPct = Math.round(storageUsed() * 100 / STORAGE_LIMIT); }
 function persist() {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify({ placeId: S.placeId, days: S.days, openedDate: S.openedDate })); } catch (e) {}
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify({ placeId: S.placeId, days: S.days, openedDate: S.openedDate, exported: S.exported }));
+    refreshUsage(); return true;
+  } catch (e) { S.modal = 'storage'; S.menu = false; refreshUsage(); return false; }
 }
 
 function lineTotal(l) { return applyDisc(l.price * l.qty, l.disc); }
@@ -288,6 +307,8 @@ function dayFile(date) {
 
 var toastTimer;
 function toast(t) { S.toast = t; clearTimeout(toastTimer); toastTimer = setTimeout(function () { S.toast = ''; render(); }, 3500); }
+
+refreshUsage();
 
 /* ---------- Actions ---------- */
 var A = {
@@ -324,7 +345,7 @@ var A = {
     S.modal = null;
   },
   removeDisc: function () { if (S.discTarget === 'ticket') S.ticketDisc = null; else S.cart[S.discTarget].disc = null; S.modal = null; },
-  close: function () { S.modal = null; },
+  close: function () { S.modal = null; S.storageMsg = ''; },
   checkCatalogue: function () { loadSiteCatalogue(true); },
   installCatalogue: function () {
     var im = S.importing;
@@ -356,7 +377,7 @@ var A = {
       sousTotal: r2(up5(subtotal())), remiseTicket: jsonDisc(S.ticketDisc), total: r2(t), paiement: pay
     });
     S.cart = []; S.ticketDisc = null; S.modal = null; S.cartOpen = false;
-    persist(); toast(msg);
+    if (persist()) toast(msg); else S.storageMsg = msg.replace('Vente enregistrée', 'Vente NON enregistrée dans l\u2019appareil');
   },
   showJson: function () { S.menu = false; S.modal = 'json'; },
   download: function (date) {
@@ -365,9 +386,16 @@ var A = {
     var blob = new Blob([JSON.stringify(dayFile(date), null, 2)], { type: 'application/json' });
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    S.exported[date] = true; persist();
     S.menu = false; toast(name + ' téléchargé');
   },
-  showDays: function () { S.menu = false; S.modal = 'days'; }
+  showDays: function () { S.menu = false; S.modal = 'days'; S.confirmDel = null; S.storageMsg = ''; },
+  askDel: function (d) { S.confirmDel = d; },
+  delDay: function (d) {
+    if (d === today() || !S.exported[d]) return;
+    delete S.days[d]; delete S.exported[d]; S.confirmDel = null;
+    if (persist()) toast('Ventes du ' + frDate(d) + ' effacées de l\u2019appareil');
+  }
 };
 
 /* ---------- Vues ---------- */
@@ -399,6 +427,7 @@ function vHome() {
         '<div style="font-size:18px;font-weight:700">' + esc(p.nom) + '</div>'
       : '<button class="btn btn-primary btn-big" data-a="goSetup">Configurer la tablette</button>' +
         '<div class="sub">Première utilisation : assignez cette tablette à son point de vente.</div>') +
+    (S.usedPct >= 80 ? vStorageBar() : '') +
     '<div style="display:flex;flex-direction:column;align-items:center;gap:2px">' +
       '<div style="font-size:14px;color:var(--faint)">' + catalogueLabel(CATALOGUE) + '</div>' +
       '<div style="display:flex;gap:8px">' +
@@ -508,7 +537,7 @@ function vPosPhone(d, p) {
     '<button class="iconbtn" data-a="toggleMenu" aria-label="Menu">' + ICON_DOTS + '</button></div>' +
     '<div class="subbar"><div class="seg"><button class="' + (S.tab === 'caisse' ? 'on' : '') + '" data-a="tab" data-v="caisse">Caisse</button><button class="' + (S.tab === 'hist' ? 'on' : '') + '" data-a="tab" data-v="hist">Historique</button></div>' +
     '<div class="place">' + ICON_PIN + '<span>' + esc(p ? p.nom : '') + '<br>' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + '</span></div></div>' +
-    (S.tab === 'caisse' ? vCaisse() : vHist()) + '</div>' +
+    vStorageBar() + (S.tab === 'caisse' ? vCaisse() : vHist()) + '</div>' +
     vMenu();
 }
 
@@ -519,7 +548,7 @@ function vPos() {
     '<div class="seg"><button class="' + (S.tab === 'caisse' ? 'on' : '') + '" data-a="tab" data-v="caisse">Caisse</button><button class="' + (S.tab === 'hist' ? 'on' : '') + '" data-a="tab" data-v="hist">Historique</button></div>' +
     '<div style="flex:1"></div><div class="place">' + ICON_PIN + '<span>' + esc(p ? p.nom : '') + ' · ' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + '</span></div>' +
     '<button class="iconbtn" data-a="toggleTheme" aria-label="' + (isDark() ? 'Mode clair' : 'Mode sombre') + '">' + (isDark() ? ICON_SUN : ICON_MOON) + '</button>' + '<button class="iconbtn" data-a="toggleMenu" aria-label="Menu">' + ICON_DOTS + '</button></div>' +
-    (S.tab === 'caisse' ? vCaisse() : vHist()) + '</div>' +
+    vStorageBar() + (S.tab === 'caisse' ? vCaisse() : vHist()) + '</div>' +
     vMenu();
 }
 
@@ -565,6 +594,21 @@ function vPay() {
   return html + '<div class="actions"><button class="btn" data-a="close" style="height:60px">Retour</button><button class="btn btn-primary" data-a="validate" style="height:60px;font-size:20px;padding:0 36px"' + (can ? '' : ' disabled') + '>Valider la vente</button></div></div></div>';
 }
 
+function vStorageBar() {
+  if (S.usedPct < 80) return '';
+  return '<button class="memwarn" data-a="showDays">⚠ Mémoire de l\u2019appareil pleine à ' + S.usedPct + ' % : touchez ici pour effacer les anciens jours exportés</button>';
+}
+
+function vStorage() {
+  return '<div class="overlay"><div class="modal" style="width:min(600px,96vw)">' +
+    '<h2 style="color:var(--red)">Mémoire pleine : enregistrement impossible</h2>' +
+    (S.storageMsg ? '<div class="result ko" style="display:block;font-size:18px;font-weight:800">' + esc(S.storageMsg) + '</div>' : '') +
+    '<div style="font-size:17px;line-height:1.5">L\u2019appareil n\u2019a plus de place pour enregistrer les ventes. Elles restent disponibles <strong>tant que l\u2019app reste ouverte</strong>.</div>' +
+    '<div style="font-size:17px;line-height:1.5"><strong>1.</strong> Exportez tout de suite les ventes du jour.<br><strong>2.</strong> Effacez les anciens jours déjà exportés.</div>' +
+    '<div class="actions stack"><button class="btn" data-a="close">Fermer</button><button class="btn" data-a="showDays">Effacer d\u2019anciens jours</button><button class="btn btn-primary" data-a="download">Exporter les ventes du jour</button></div>' +
+    '</div></div>';
+}
+
 function vDays() {
   var dates = Object.keys(S.days).filter(function (d) { return S.days[d] && S.days[d].length; }).sort().reverse();
   var rows = dates.map(function (d) {
@@ -573,11 +617,16 @@ function vDays() {
     return '<div class="row" style="gap:12px;padding:12px 4px;border-bottom:1px solid var(--soft)">' +
       '<div style="display:flex;flex-direction:column;gap:2px"><strong style="font-size:18px">' + frDate(d) + (isToday ? ' <span class="sub">(aujourd’hui)</span>' : '') + '</strong>' +
       '<span class="sub">' + s.length + ' vente' + (s.length > 1 ? 's' : '') + ' · ' + money(tot) + '</span></div>' +
-      '<button class="btn" data-a="download" data-v="' + d + '" style="flex-shrink:0">Télécharger</button></div>';
+      '<div class="dayact">' + (isToday ? '' : !S.exported[d] ? '<span class="sub">Pas encore exporté</span>'
+        : S.confirmDel === d ? '<button class="btn btn-danger" data-a="delDay" data-v="' + d + '" style="border:1px solid var(--red)">Confirmer l\u2019effacement</button>'
+        : '<button class="btn btn-danger" data-a="askDel" data-v="' + d + '">Effacer</button>') +
+      '<button class="btn" data-a="download" data-v="' + d + '" style="flex-shrink:0">Télécharger</button></div></div>';
   }).join('');
   return '<div class="overlay"><div class="modal" style="width:min(640px,96vw);max-height:90%">' +
     '<div class="row"><h2>Ventes enregistrées</h2><button class="btn" data-a="close">Fermer</button></div>' +
-    '<div class="sub">Les ventes de chaque jour restent dans la tablette. Téléchargez à nouveau le fichier d’un jour si besoin.</div>' +
+    '<div class="memgauge"><div class="row"><span>Mémoire de l\u2019appareil</span><strong' + (S.usedPct >= 80 ? ' style="color:var(--red)"' : '') + '>' + storageMo(storageUsed()) + ' sur ' + storageMo(STORAGE_LIMIT) + ' (' + S.usedPct + ' %)</strong></div>' +
+      '<div class="bar"><i style="width:' + Math.min(100, S.usedPct) + '%;background:' + (S.usedPct >= 80 ? 'var(--red)' : 'var(--green)') + '"></i></div></div>' +
+    '<div class="sub">Les ventes de chaque jour restent dans l\u2019appareil. Un jour ne peut être effacé qu\u2019après avoir été téléchargé. Le jour en cours ne peut pas être effacé.</div>' +
     '<div style="overflow-y:auto">' + (rows || '<div class="empty">Aucune vente enregistrée</div>') + '</div>' +
     '</div></div>';
 }
@@ -598,6 +647,7 @@ function render() {
   else if (S.modal === 'pay') html += vPay();
   else if (S.modal === 'json') html += vJson();
   else if (S.modal === 'days') html += vDays();
+  else if (S.modal === 'storage') html += vStorage();
   else if (S.modal === 'import') html += vImport();
   if (S.toast) html += '<div class="toast">' + esc(S.toast) + '</div>';
   app.innerHTML = html;

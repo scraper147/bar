@@ -59,9 +59,11 @@ Le bouton **Paramètres de la tablette → Vérifier les mises à jour** force l
 - Exportez les ventes au moins **deux fois par jour** (midi et soir) : menu **⋮ → Exporter / partager les ventes du jour**.
 - Pour retélécharger le fichier d'un jour précédent : menu **⋮ → Ventes des jours précédents → Télécharger**.
 - N'effacez jamais les données de Chrome sur les tablettes de caisse.
+- **Mémoire de l'appareil** (environ 5 Mo, partagés avec les autres caisses du même compte GitHub) : la jauge est dans **⋮ → Ventes des jours précédents**. Au-delà de 80 %, un bandeau orange s'affiche : effacez alors les anciens jours. Un jour ne peut être effacé qu'après avoir été téléchargé, et jamais le jour en cours.
+- Si l'enregistrement échoue (mémoire pleine), une alerte rouge s'affiche : **exportez immédiatement** les ventes du jour, sans fermer l'app.
 - Une tablette = un point de vente.
 
 ## Important si la caisse sapins est sur le même compte GitHub
 
-Cette caisse utilise ses propres clés de stockage (`bar-caisse`, `bar-caisse-catalogue`) et son propre cache (`caisse-bar-v6`).
+Cette caisse utilise ses propres clés de stockage (`bar-caisse`, `bar-caisse-catalogue`) et son propre cache (`caisse-bar-v7`).
 Les deux apps peuvent donc être installées sur la même tablette sans mélanger ventes ni catalogue.
