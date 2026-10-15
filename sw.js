@@ -1,7 +1,7 @@
 /* Caisse Bar – fonctionnement hors ligne.
    Avec réseau : on prend la dernière version publiée (et on la garde en cache).
    Sans réseau : on sert la version en cache. */
-var CACHE = 'caisse-bar-v5';
+var CACHE = 'caisse-bar-v6';
 var FILES = ['./', './index.html', './manifest.webmanifest', './catalogue.json',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png'];
 
