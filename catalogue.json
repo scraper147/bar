@@ -1,9 +1,8 @@
 {
   "format": "caisse-bar/catalogue",
   "formatVersion": 1,
-  "version": 1,
-  "date": "2026-10-14",
-  "exemple": true,
+  "version": 2,
+  "date": "2026-10-16",
   "pointsDeVente": [
     {
       "id": "pdv1",
@@ -18,135 +17,337 @@
   ],
   "categories": [
     {
-      "id": "soft",
+      "id": "softs",
       "nom": "Softs",
       "ordre": 1,
       "actif": true,
       "prefixe": false,
       "produits": [
         {
-          "id": "s1",
+          "id": "soft-eau-plate",
           "libelle": "Eau plate",
-          "prix": 2,
+          "prix": 3,
           "ordre": 1,
           "actif": true
         },
         {
-          "id": "s2",
+          "id": "soft-eau-petillante",
           "libelle": "Eau pétillante",
-          "prix": 2,
+          "prix": 3,
           "ordre": 2,
           "actif": true
         },
         {
-          "id": "s3",
-          "libelle": "Cola",
-          "prix": 2.5,
+          "id": "soft-coca-cola",
+          "libelle": "Coca-Cola",
+          "prix": 3,
           "ordre": 3,
           "actif": true
         },
         {
-          "id": "s4",
-          "libelle": "Jus d’orange",
-          "prix": 2.5,
+          "id": "soft-red-bull",
+          "libelle": "Red Bull",
+          "prix": 3,
           "ordre": 4,
+          "actif": true
+        },
+        {
+          "id": "soft-fanta",
+          "libelle": "Fanta",
+          "prix": 3,
+          "ordre": 5,
+          "actif": true
+        },
+        {
+          "id": "soft-sprite",
+          "libelle": "Sprite",
+          "prix": 3,
+          "ordre": 6,
+          "actif": true
+        },
+        {
+          "id": "soft-ice-tea",
+          "libelle": "Ice Tea",
+          "prix": 3,
+          "ordre": 7,
           "actif": true
         }
       ]
     },
     {
-      "id": "biere",
+      "id": "bieres",
       "nom": "Bières",
       "ordre": 2,
       "actif": true,
       "prefixe": false,
       "produits": [
         {
-          "id": "b1",
-          "libelle": "Bière pression 25 cl",
-          "prix": 2.5,
+          "id": "biere-jupiler",
+          "libelle": "Jupiler",
+          "prix": 3,
           "ordre": 1,
           "actif": true
         },
         {
-          "id": "b2",
-          "libelle": "Bière pression 50 cl",
-          "prix": 4.5,
+          "id": "biere-bertinchamps-framboise",
+          "libelle": "Bertinchamps Framboise 4,2 %",
+          "prix": 3,
           "ordre": 2,
           "actif": true
         },
         {
-          "id": "b3",
-          "libelle": "Bière spéciale",
-          "prix": 4,
+          "id": "biere-bertinchamps-hiver",
+          "libelle": "Bertinchamps Hiver 8 %",
+          "prix": 3,
           "ordre": 3,
+          "actif": true
+        },
+        {
+          "id": "biere-bertinchamps-passion",
+          "libelle": "Bertinchamps Passion 0 %",
+          "prix": 6,
+          "ordre": 4,
+          "actif": true
+        },
+        {
+          "id": "biere-desperados",
+          "libelle": "Desperados",
+          "prix": 6,
+          "ordre": 5,
           "actif": true
         }
       ]
     },
     {
-      "id": "vin",
+      "id": "vins",
       "nom": "Vins",
       "ordre": 3,
       "actif": true,
       "prefixe": false,
       "produits": [
         {
-          "id": "v1",
-          "libelle": "Verre de vin rouge",
-          "prix": 4,
+          "id": "vin-rouge-verre",
+          "libelle": "Vin rouge (verre)",
+          "prix": 6,
           "ordre": 1,
           "actif": true
         },
         {
-          "id": "v2",
-          "libelle": "Verre de vin blanc",
-          "prix": 4,
+          "id": "vin-blanc-verre",
+          "libelle": "Vin blanc (verre)",
+          "prix": 6,
           "ordre": 2,
           "actif": true
         },
         {
-          "id": "v3",
-          "libelle": "Verre de rosé",
-          "prix": 4,
+          "id": "vin-rose-verre",
+          "libelle": "Vin rosé (verre)",
+          "prix": 6,
           "ordre": 3,
           "actif": true
         },
         {
-          "id": "v4",
-          "libelle": "Bouteille de vin",
-          "prix": 18,
+          "id": "vin-rouge-bouteille",
+          "libelle": "Vin rouge (bouteille)",
+          "prix": 24,
           "ordre": 4,
+          "actif": true
+        },
+        {
+          "id": "vin-blanc-bouteille",
+          "libelle": "Vin blanc (bouteille)",
+          "prix": 24,
+          "ordre": 5,
+          "actif": true
+        },
+        {
+          "id": "vin-rose-bouteille",
+          "libelle": "Vin rosé (bouteille)",
+          "prix": 24,
+          "ordre": 6,
           "actif": true
         }
       ]
     },
     {
-      "id": "chaud",
-      "nom": "Boissons chaudes",
+      "id": "alcools-verre",
+      "nom": "Alcools verre",
       "ordre": 4,
       "actif": true,
       "prefixe": false,
       "produits": [
         {
-          "id": "c1",
-          "libelle": "Café",
-          "prix": 2,
+          "id": "alcool-jack-daniels-verre",
+          "libelle": "Jack Daniel’s (verre)",
+          "prix": 9,
           "ordre": 1,
           "actif": true
         },
         {
-          "id": "c2",
-          "libelle": "Thé",
-          "prix": 2,
+          "id": "alcool-grey-goose-verre",
+          "libelle": "Grey Goose (verre)",
+          "prix": 15,
           "ordre": 2,
           "actif": true
         },
         {
-          "id": "c3",
-          "libelle": "Chocolat chaud",
-          "prix": 2.5,
+          "id": "alcool-eristoff-rouge-verre",
+          "libelle": "Eristoff rouge (verre)",
+          "prix": 9,
           "ordre": 3,
+          "actif": true
+        },
+        {
+          "id": "alcool-eristoff-blanc-verre",
+          "libelle": "Eristoff blanc (verre)",
+          "prix": 9,
+          "ordre": 4,
+          "actif": true
+        },
+        {
+          "id": "alcool-bacardi-blanc-verre",
+          "libelle": "Bacardi Blanc (verre)",
+          "prix": 9,
+          "ordre": 5,
+          "actif": true
+        },
+        {
+          "id": "alcool-captain-morgan-verre",
+          "libelle": "Captain Morgan (verre)",
+          "prix": 9,
+          "ordre": 6,
+          "actif": true
+        },
+        {
+          "id": "alcool-bombay-sapphire-verre",
+          "libelle": "Bombay Sapphire (verre)",
+          "prix": 9,
+          "ordre": 7,
+          "actif": true
+        }
+      ]
+    },
+    {
+      "id": "alcools-bouteille",
+      "nom": "Alcools bouteille",
+      "ordre": 5,
+      "actif": true,
+      "prefixe": false,
+      "produits": [
+        {
+          "id": "alcool-jack-daniels-bouteille",
+          "libelle": "Jack Daniel’s (bouteille)",
+          "prix": 108,
+          "ordre": 1,
+          "actif": true
+        },
+        {
+          "id": "alcool-grey-goose-bouteille",
+          "libelle": "Grey Goose (bouteille)",
+          "prix": 153,
+          "ordre": 2,
+          "actif": true
+        },
+        {
+          "id": "alcool-eristoff-rouge-bouteille",
+          "libelle": "Eristoff rouge (bouteille)",
+          "prix": 108,
+          "ordre": 3,
+          "actif": true
+        },
+        {
+          "id": "alcool-eristoff-blanc-bouteille",
+          "libelle": "Eristoff blanc (bouteille)",
+          "prix": 108,
+          "ordre": 4,
+          "actif": true
+        },
+        {
+          "id": "alcool-bacardi-blanc-bouteille",
+          "libelle": "Bacardi Blanc (bouteille)",
+          "prix": 108,
+          "ordre": 5,
+          "actif": true
+        },
+        {
+          "id": "alcool-captain-morgan-bouteille",
+          "libelle": "Captain Morgan (bouteille)",
+          "prix": 108,
+          "ordre": 6,
+          "actif": true
+        },
+        {
+          "id": "alcool-bombay-sapphire-bouteille",
+          "libelle": "Bombay Sapphire (bouteille)",
+          "prix": 108,
+          "ordre": 7,
+          "actif": true
+        }
+      ]
+    },
+    {
+      "id": "cocktails",
+      "nom": "Cocktails",
+      "ordre": 6,
+      "actif": true,
+      "prefixe": false,
+      "produits": [
+        {
+          "id": "cocktail-chlorophylle-night",
+          "libelle": "Chlorophylle Night",
+          "prix": 9,
+          "ordre": 1,
+          "actif": true
+        },
+        {
+          "id": "cocktail-aperol-spritz",
+          "libelle": "Apérol Spritz",
+          "prix": 9,
+          "ordre": 2,
+          "actif": true
+        },
+        {
+          "id": "cocktail-st-germain-spritz",
+          "libelle": "St-Germain Spritz",
+          "prix": 9,
+          "ordre": 3,
+          "actif": true
+        }
+      ]
+    },
+    {
+      "id": "bulles",
+      "nom": "Bulles",
+      "ordre": 7,
+      "actif": true,
+      "prefixe": false,
+      "produits": [
+        {
+          "id": "bulles-cava-verre",
+          "libelle": "Cava (verre)",
+          "prix": 6,
+          "ordre": 1,
+          "actif": true
+        },
+        {
+          "id": "bulles-champagne-verre",
+          "libelle": "Champagne (verre)",
+          "prix": 12,
+          "ordre": 2,
+          "actif": true
+        },
+        {
+          "id": "bulles-cava-bouteille",
+          "libelle": "Cava (bouteille)",
+          "prix": 30,
+          "ordre": 3,
+          "actif": true
+        },
+        {
+          "id": "bulles-champagne-bouteille",
+          "libelle": "Champagne (bouteille)",
+          "prix": 90,
+          "ordre": 4,
           "actif": true
         }
       ]

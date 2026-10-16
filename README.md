@@ -88,7 +88,7 @@ Le bouton **Paramètres de la tablette → Vérifier les mises à jour** force l
 
 Les caisses du compte partagent l'adresse `scraper147.github.io` (caisse sapins dans `/sapin/`, Caisse Bar dans `/bar/`). Pour qu'elles cohabitent :
 - clés de stockage propres : `bar-caisse`, `bar-caisse-catalogue` ;
-- cache hors ligne propre, préfixé `caisse-bar-` (actuellement `caisse-bar-v13`) : une mise à jour de la Caisse Bar ne supprime que ses anciens caches, jamais ceux de la caisse sapins ;
+- cache hors ligne propre, préfixé `caisse-bar-` (actuellement `caisse-bar-v14`) : une mise à jour de la Caisse Bar ne supprime que ses anciens caches, jamais ceux de la caisse sapins ;
 - icône « Caisse Bar », `start_url` et `scope` limités à `./` (le dossier `/bar/`).
 
-Pour une mise à jour, augmentez uniquement le numéro dans `sw.js` (`var CACHE = PREFIX + 'v14';`), sans changer le préfixe.
+Pour une mise à jour, augmentez uniquement le numéro dans `sw.js` (`var CACHE = PREFIX + 'v15';`), sans changer le préfixe.
