@@ -1,0 +1,146 @@
+{
+  "format": "caisse-bar/reglages",
+  "formatVersion": 1,
+  "exporte": "2026-10-16T21:07:42+02:00",
+  "pointDeVente": {
+    "id": "pdv1",
+    "nom": "Bar 1"
+  },
+  "catalogueVersion": 2,
+  "articlesAjoutes": [
+    {
+      "id": "bieres-bertinchamps-triple",
+      "categorie": {
+        "id": "bieres",
+        "nom": "Bières"
+      },
+      "libelle": "Bertinchamps triple",
+      "prix": 6,
+      "cree": "2026-10-16T19:33:03+02:00"
+    },
+    {
+      "id": "bieres-bertinchamps-ipa",
+      "categorie": {
+        "id": "bieres",
+        "nom": "Bières"
+      },
+      "libelle": "Bertinchamps Ipa",
+      "prix": 3,
+      "cree": "2026-10-16T19:34:31+02:00"
+    },
+    {
+      "id": "bieres-bertinchamps-legere",
+      "categorie": {
+        "id": "bieres",
+        "nom": "Bières"
+      },
+      "libelle": "Bertinchamps legere",
+      "prix": 3,
+      "cree": "2026-10-16T19:34:53+02:00"
+    },
+    {
+      "id": "nourritue-hamburger",
+      "categorie": {
+        "id": "nourritue",
+        "nom": "Nourritue"
+      },
+      "libelle": "Hamburger",
+      "prix": 10,
+      "cree": "2026-10-16T19:37:17+02:00"
+    },
+    {
+      "id": "softs-coca-light",
+      "categorie": {
+        "id": "softs",
+        "nom": "Softs"
+      },
+      "libelle": "Coca light",
+      "prix": 3,
+      "cree": "2026-10-16T19:39:30+02:00"
+    }
+  ],
+  "prixModifies": [],
+  "articlesDesactives": [
+    {
+      "id": "b1",
+      "libelle": null,
+      "categorie": null
+    },
+    {
+      "id": "b2",
+      "libelle": null,
+      "categorie": null
+    },
+    {
+      "id": "b3",
+      "libelle": null,
+      "categorie": null
+    },
+    {
+      "id": "v1",
+      "libelle": null,
+      "categorie": null
+    },
+    {
+      "id": "v2",
+      "libelle": null,
+      "categorie": null
+    },
+    {
+      "id": "v3",
+      "libelle": null,
+      "categorie": null
+    },
+    {
+      "id": "v4",
+      "libelle": null,
+      "categorie": null
+    },
+    {
+      "id": "c1",
+      "libelle": null,
+      "categorie": null
+    },
+    {
+      "id": "c2",
+      "libelle": null,
+      "categorie": null
+    },
+    {
+      "id": "c3",
+      "libelle": null,
+      "categorie": null
+    },
+    {
+      "id": "s3",
+      "libelle": null,
+      "categorie": null
+    },
+    {
+      "id": "s4",
+      "libelle": null,
+      "categorie": null
+    },
+    {
+      "id": "softs-eau-plate",
+      "libelle": null,
+      "categorie": null
+    },
+    {
+      "id": "biere-bertinchamps-hiver",
+      "libelle": "Bertinchamps Hiver 8 %",
+      "categorie": {
+        "id": "bieres",
+        "nom": "Bières"
+      }
+    },
+    {
+      "id": "soft-ice-tea",
+      "libelle": "Ice Tea",
+      "categorie": {
+        "id": "softs",
+        "nom": "Softs"
+      }
+    }
+  ]
+}
