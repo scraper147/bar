@@ -235,6 +235,19 @@ pre.json{flex:1;margin:0;overflow:auto;background:#151B12;color:#E4EBDC;border-r
 .mrow .mp small{font-size:11px;font-weight:600;color:var(--muted)}
 .mrow .mp.mod{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .mrow{cursor:default}
+.hhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin-bottom:12px}
+.hhead h2{margin:0 !important}
+.hdays{display:flex;flex-wrap:wrap;gap:6px}
+.hdays .choice{height:40px;padding:0 14px;font-size:15px}
+.hsum{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin-bottom:10px;font-size:17px}
+.sale{grid-template-columns:110px minmax(0,1fr) 220px 100px 110px !important}
+.sale .act{display:flex;justify-content:flex-end}
+.sale .act .btn{height:42px;padding:0 14px;font-size:15px}
+.sale.cancelled .h,.sale.cancelled .l>span:not(.annul),.sale.cancelled .pm,.sale.cancelled .tt{opacity:.45;text-decoration:line-through}
+.sale .annul{color:var(--red);font-weight:700;font-size:14px}
+.phone .sale{grid-template-columns:1fr auto !important;grid-template-areas:"h tt" "l l" "pm act" !important}
+.phone .sale .act{grid-area:act}
+.phone .hhead{flex-direction:column;align-items:flex-start}
 </style>
 </head>
 <body>
@@ -402,6 +415,7 @@ function lineTotal(l) { return applyDisc(l.price * l.qty, l.disc); }
 function subtotal() { return S.cart.reduce(function (a, l) { return a + lineTotal(l); }, 0); }
 function total() { return applyDisc(up5(subtotal()), S.ticketDisc); }
 function today() { return isoDate(new Date()); }
+function validSales(list) { return (list || []).filter(function (v) { return !v.annulation; }); }
 function salesOf(date) { return S.days[date || today()] || []; }
 function placeOf(date) {
   var s = salesOf(date);
@@ -412,16 +426,17 @@ function fileName(date) { var p = placeOf(date); return 'ventes_' + (date || tod
 
 function dayFile(date) {
   date = date || today();
-  var sales = salesOf(date);
+  var all = salesOf(date), sales = validSales(all);
   return {
     format: 'caisse-bar/ventes', formatVersion: 1, date: date,
     pointDeVente: placeOf(date),
     catalogueVersion: CATALOGUE ? CATALOGUE.version : null, miseAJour: isoLocal(new Date()),
     nombreVentes: sales.length,
+    nombreAnnulations: all.length - sales.length,
     totalJournee: r2(sales.reduce(function (a, v) { return a + v.total; }, 0)),
     totalCash: r2(sales.reduce(function (a, v) { return a + v.paiement.cash; }, 0)),
     totalBancontact: r2(sales.reduce(function (a, v) { return a + v.paiement.bancontact; }, 0)),
-    ventes: sales
+    ventes: all
   };
 }
 
@@ -438,7 +453,7 @@ var A = {
   goHome: function () { S.screen = 'home'; S.menu = false; if (S.siteUpdate && !S.modal) { S.importing = S.siteUpdate; S.modal = 'import'; } },
   openPos: function () { S.screen = 'pos'; S.tab = 'caisse'; S.openedDate = today(); persist(); },
   fullscreen: function () { var el = document.documentElement; (el.requestFullscreen || el.webkitRequestFullscreen || function () {}).call(el); },
-  tab: function (t) { S.tab = t; S.menu = false; S.cartOpen = false; },
+  tab: function (t) { S.tab = t; S.menu = false; S.cartOpen = false; if (t === 'hist') S.histDay = today(); },
   toggleMenu: function () { S.menu = !S.menu; },
   openCart: function () { S.cartOpen = true; S.menu = false; },
   closeCart: function () { S.cartOpen = false; },
@@ -493,6 +508,17 @@ var A = {
     delete PRICES[S.pxId]; if (!savePrices()) return;
     applyPrices(CATALOGUE); S.modal = null;
     toast('« ' + p.libelle + ' » revient au prix du catalogue : ' + money(p.prixCatalogue));
+  },
+  histDay: function (d) { S.histDay = d; },
+  askCancel: function (ref) { S.modal = 'cancel'; S.cancelRef = ref; S.cancelMotif = ''; },
+  doCancel: function () {
+    var parts = (S.cancelRef || '').split('|'), v = salesOf(parts[0]).filter(function (x) { return x.id === parts[1]; })[0];
+    if (!v || v.annulation) { S.modal = null; return; }
+    var motif = (S.cancelMotif || '').trim().slice(0, 120);
+    v.annulation = { horodatage: isoLocal(new Date()), motif: motif };
+    var wasExported = !!S.exported[parts[0]]; delete S.exported[parts[0]];
+    S.modal = null;
+    if (persist()) toast('Vente de ' + v.horodatage.slice(11, 16) + ' annulée' + (wasExported ? ' · pensez à re-télécharger ce jour' : ''));
   },
   showManage: function () { S.menu = false; S.cartOpen = false; S.tab = 'gestion'; },
   toggleItem: function (id) {
@@ -689,17 +715,31 @@ function vCaisse() {
   return html;
 }
 
+function histDays() {
+  var t = today(), ds = Object.keys(S.days).filter(function (d) { return S.days[d] && S.days[d].length; });
+  if (ds.indexOf(t) < 0) ds.push(t);
+  return ds.sort().reverse().slice(0, 7);
+}
 function vHist() {
-  var d = new Date();
-  var html = '<div class="hist"><h2>Ventes du ' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + '</h2>';
-  var sales = salesOf(today()).slice().reverse();
-  if (!sales.length) return html + '<div class="empty" style="padding:60px">Aucune vente aujourd\'hui</div></div>';
+  var days = histDays(), day = days.indexOf(S.histDay) >= 0 ? S.histDay : today();
+  var all = salesOf(day), ok = validSales(all), nAnn = all.length - ok.length;
+  var tot = ok.reduce(function (a, v) { return a + v.total; }, 0);
+  var html = '<div class="hist"><div class="hhead"><h2>Ventes du ' + frDate(day) + '</h2>' +
+    (days.length > 1 ? '<div class="hdays">' + days.map(function (d) {
+      return '<button class="choice' + (d === day ? ' on' : '') + '" data-a="histDay" data-v="' + d + '">' + (d === today() ? 'Aujourd\u2019hui' : frDate(d).slice(0, 5)) + '</button>'; }).join('') + '</div>' : '') + '</div>';
+  if (!all.length) return html + '<div class="empty" style="padding:60px">Aucune vente ce jour-là</div></div>';
+  html += '<div class="hsum"><strong>' + ok.length + ' vente' + (ok.length > 1 ? 's' : '') + ' · ' + money(tot) + '</strong>' +
+    (nAnn ? '<span class="sub">' + nAnn + ' vente' + (nAnn > 1 ? 's' : '') + ' annulée' + (nAnn > 1 ? 's' : '') + ', non comptée' + (nAnn > 1 ? 's' : '') + '</span>' : '') + '</div>';
   html += '<div class="table">';
-  sales.forEach(function (v) {
+  all.slice().reverse().forEach(function (v) {
     var lines = v.lignes.map(function (l) { return l.quantite + ' × ' + esc(l.libelle) + (l.remise ? ' (' + discText(fromJsonDisc(l.remise)) + ')' : ''); });
     if (v.remiseTicket) lines.push('Remise ticket ' + discText(fromJsonDisc(v.remiseTicket)));
     var p = v.paiement, pay = p.mode === 'cash' ? 'Cash' : p.mode === 'bancontact' ? 'Bancontact' : 'Mixte · cash ' + money(p.cash) + ' + Bancontact ' + money(p.bancontact);
-    html += '<div class="sale"><span class="h">' + v.horodatage.slice(11, 16) + '</span><div class="l">' + lines.map(function (x) { return '<span>' + x + '</span>'; }).join('') + '</div><span class="pm">' + pay + '</span><span class="tt">' + money(v.total) + '</span></div>';
+    var an = v.annulation;
+    html += '<div class="sale' + (an ? ' cancelled' : '') + '"><span class="h">' + v.horodatage.slice(11, 16) + '</span><div class="l">' + lines.map(function (x) { return '<span>' + x + '</span>'; }).join('') +
+      (an ? '<span class="annul">Annulée à ' + an.horodatage.slice(11, 16) + (an.horodatage.slice(0, 10) !== day ? ' le ' + frDate(an.horodatage) : '') + (an.motif ? ' · ' + esc(an.motif) : '') + '</span>' : '') +
+      '</div><span class="pm">' + pay + '</span><span class="tt">' + money(v.total) + '</span>' +
+      '<span class="act">' + (an ? '' : '<button class="btn btn-danger" data-a="askCancel" data-v="' + esc(day + '|' + v.id) + '">Annuler</button>') + '</span></div>';
   });
   return html + '</div></div>';
 }
@@ -792,6 +832,21 @@ function vPrice() {
     '<div class="actions stack"><button class="btn" data-a="close">Annuler</button>' +
     (mod ? '<button class="btn" data-a="resetPrice">Revenir au prix du catalogue</button>' : '') +
     '<button class="btn btn-primary" data-a="savePrice"' + (ok ? '' : ' disabled') + '>Enregistrer</button></div></div></div>';
+}
+
+function vCancel() {
+  var parts = (S.cancelRef || '').split('|'), v = salesOf(parts[0]).filter(function (x) { return x.id === parts[1]; })[0];
+  if (!v) return '';
+  var p = v.paiement, pay = p.mode === 'cash' ? 'cash' : p.mode === 'bancontact' ? 'Bancontact' : 'cash ' + money(p.cash) + ' + Bancontact ' + money(p.bancontact);
+  return '<div class="overlay"><div class="modal" style="width:min(560px,96vw)"><h2>Annuler cette vente ?</h2>' +
+    '<div class="result" style="display:block;line-height:1.5"><strong>' + frDate(parts[0]) + ' à ' + v.horodatage.slice(11, 16) + ' · ' + money(v.total) + '</strong> (' + pay + ')<br>' +
+      v.lignes.map(function (l) { return l.quantite + ' × ' + esc(l.libelle); }).join(', ') + '</div>' +
+    '<label class="f">Motif (facultatif)<input type="text" data-f="cancelMotif" value="' + esc(S.cancelMotif || '') + '" placeholder="ex. erreur de saisie, client remboursé" autocomplete="off"></label>' +
+    '<div class="sub">La vente reste visible dans l\u2019historique et dans l\u2019export, marquée « annulée », mais n\u2019est plus comptée dans les totaux. ' +
+    (p.cash > 0 ? 'Pensez à rendre <strong>' + money(p.cash) + '</strong> en cash si le client est remboursé. ' : '') +
+    (p.bancontact > 0 ? 'Un paiement Bancontact se rembourse sur le terminal. ' : '') + 'Cette action ne peut pas être défaite.</div>' +
+    (S.exported[parts[0]] ? '<div class="sub" style="color:var(--amber);font-weight:700">Ce jour a déjà été exporté : il faudra le télécharger à nouveau.</div>' : '') +
+    '<div class="actions stack"><button class="btn" data-a="close">Retour</button><button class="btn btn-primary" data-a="doCancel" style="background:var(--red);border-color:var(--red);color:#fff">Annuler la vente</button></div></div></div>';
 }
 
 function vManage() {
@@ -888,11 +943,11 @@ function vStorage() {
 function vDays() {
   var dates = Object.keys(S.days).filter(function (d) { return S.days[d] && S.days[d].length; }).sort().reverse();
   var rows = dates.map(function (d) {
-    var s = S.days[d], tot = s.reduce(function (a, v) { return a + v.total; }, 0);
+    var s = validSales(S.days[d]), nAnn = S.days[d].length - s.length, tot = s.reduce(function (a, v) { return a + v.total; }, 0);
     var isToday = d === today();
     return '<div class="row" style="gap:12px;padding:12px 4px;border-bottom:1px solid var(--soft)">' +
       '<div style="display:flex;flex-direction:column;gap:2px"><strong style="font-size:18px">' + frDate(d) + (isToday ? ' <span class="sub">(aujourd’hui)</span>' : '') + '</strong>' +
-      '<span class="sub">' + s.length + ' vente' + (s.length > 1 ? 's' : '') + ' · ' + money(tot) + '</span></div>' +
+      '<span class="sub">' + s.length + ' vente' + (s.length > 1 ? 's' : '') + ' · ' + money(tot) + (nAnn ? ' · ' + nAnn + ' annulée' + (nAnn > 1 ? 's' : '') : '') + '</span></div>' +
       '<div class="dayact">' + (isToday ? '' : !S.exported[d] ? '<span class="sub">Pas encore exporté</span>'
         : S.confirmDel === d ? '<button class="btn btn-danger" data-a="delDay" data-v="' + d + '" style="border:1px solid var(--red)">Confirmer l\u2019effacement</button>'
         : '<button class="btn btn-danger" data-a="askDel" data-v="' + d + '">Effacer</button>') +
@@ -926,6 +981,7 @@ function render() {
   else if (S.modal === 'storage') html += vStorage();
   else if (S.modal === 'addcat') html += vAddCat();
   else if (S.modal === 'price') html += vPrice();
+  else if (S.modal === 'cancel') html += vCancel();
   else if (S.modal === 'import') html += vImport();
   if (S.toast) html += '<div class="toast">' + esc(S.toast) + '</div>';
   app.innerHTML = html;

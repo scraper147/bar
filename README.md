@@ -37,6 +37,13 @@ Menu **⋮ → Ajouter un article au catalogue** : choisir une catégorie (ou en
 - Ces articles sont propres à l'appareil et sont **gardés** lors des mises à jour de `catalogue.json`. Si le catalogue officiel contient un jour le même ID, c'est la version officielle qui est utilisée.
 - Pour corriger une erreur : supprimer l'article dans la même fenêtre, puis le recréer. Les ventes déjà faites ne changent pas.
 
+## Annuler une vente
+
+Onglet **Historique** : choisir le jour (aujourd'hui ou l'un des 6 jours précédents), puis **Annuler** sur la vente concernée, avec un motif facultatif.
+- La vente n'est pas effacée : elle reste affichée barrée avec l'heure et le motif de l'annulation, et figure dans l'export avec un champ `annulation`. Elle n'est plus comptée dans les totaux (`totalJournee`, `totalCash`, `totalBancontact`, `nombreVentes` ; `nombreAnnulations` en plus).
+- Si le jour avait déjà été exporté, il faut le télécharger à nouveau (l'app le signale).
+- Une annulation ne peut pas être défaite. Le remboursement éventuel (cash ou terminal Bancontact) se fait à part.
+
 ## Activer / désactiver des articles, changer un prix
 
 Menu **⋮ → Gérer le catalogue (activer / désactiver)** : liste de tous les articles par catégorie, avec un interrupteur par article et un « Tout activer / Tout désactiver » par catégorie.
@@ -81,7 +88,7 @@ Le bouton **Paramètres de la tablette → Vérifier les mises à jour** force l
 
 Les caisses du compte partagent l'adresse `scraper147.github.io` (caisse sapins dans `/sapin/`, Caisse Bar dans `/bar/`). Pour qu'elles cohabitent :
 - clés de stockage propres : `bar-caisse`, `bar-caisse-catalogue` ;
-- cache hors ligne propre, préfixé `caisse-bar-` (actuellement `caisse-bar-v12`) : une mise à jour de la Caisse Bar ne supprime que ses anciens caches, jamais ceux de la caisse sapins ;
+- cache hors ligne propre, préfixé `caisse-bar-` (actuellement `caisse-bar-v13`) : une mise à jour de la Caisse Bar ne supprime que ses anciens caches, jamais ceux de la caisse sapins ;
 - icône « Caisse Bar », `start_url` et `scope` limités à `./` (le dossier `/bar/`).
 
-Pour une mise à jour, augmentez uniquement le numéro dans `sw.js` (`var CACHE = PREFIX + 'v13';`), sans changer le préfixe.
+Pour une mise à jour, augmentez uniquement le numéro dans `sw.js` (`var CACHE = PREFIX + 'v14';`), sans changer le préfixe.
