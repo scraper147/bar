@@ -1,7 +1,7 @@
 {
   "format": "caisse-bar/catalogue",
   "formatVersion": 1,
-  "version": 3,
+  "version": 4,
   "date": "2026-10-16",
   "pointsDeVente": [
     {
@@ -77,6 +77,13 @@
           "libelle": "Coca light",
           "prix": 3,
           "ordre": 8,
+          "actif": true
+        },
+        {
+          "id": "softs-coca-zero",
+          "libelle": "Coca Zero",
+          "prix": 3,
+          "ordre": 9,
           "actif": true
         }
       ]
