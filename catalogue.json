@@ -27,21 +27,21 @@
           "id": "soft-eau-plate",
           "libelle": "Eau plate",
           "prix": 3,
-          "ordre": 1,
+          "ordre": 8,
           "actif": true
         },
         {
           "id": "soft-eau-petillante",
           "libelle": "Eau pétillante",
           "prix": 3,
-          "ordre": 2,
+          "ordre": 9,
           "actif": true
         },
         {
           "id": "soft-coca-cola",
           "libelle": "Coca-Cola",
           "prix": 3,
-          "ordre": 3,
+          "ordre": 1,
           "actif": true
         },
         {
@@ -76,14 +76,14 @@
           "id": "softs-coca-light",
           "libelle": "Coca light",
           "prix": 3,
-          "ordre": 8,
+          "ordre": 3,
           "actif": true
         },
         {
           "id": "softs-coca-zero",
           "libelle": "Coca Zero",
           "prix": 3,
-          "ordre": 9,
+          "ordre": 2,
           "actif": true
         }
       ]
