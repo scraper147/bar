@@ -202,6 +202,32 @@ pre.json{flex:1;margin:0;overflow:auto;background:#151B12;color:#E4EBDC;border-r
 .naitem{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
 .naitem .btn{flex-shrink:0;height:44px}
 .phone .addcat .grid2{grid-template-columns:1fr}
+.manage{flex:1;overflow-y:auto;padding:20px 24px 40px;display:flex;flex-direction:column;gap:16px}
+.manage>*{width:100%;max-width:900px;margin:0 auto}
+.mhead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.mhead h2{margin:0 0 6px;font-size:24px;font-weight:800}
+.mhead .btn{flex-shrink:0}
+.mcat{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;flex-shrink:0}
+.mcat-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:var(--soft)}
+.mct{display:flex;flex-direction:column;gap:2px}.mct strong{font-size:18px}
+.catsw{display:flex;align-items:center;gap:10px;border:none;background:none;font:inherit;font-size:14px;font-weight:700;color:var(--muted);padding:6px 0;cursor:pointer}
+.mrow{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:16px;width:100%;min-height:62px;padding:10px 16px;border:none;border-top:1px solid var(--line);background:var(--surface);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.mrow .mn{display:flex;flex-direction:column;gap:2px;font-size:17px;font-weight:700;min-width:0}
+.mrow .mid{font-size:12px;font-weight:400;color:var(--faint);font-family:ui-monospace,Menlo,Consolas,monospace}
+.mrow .mp{font-size:17px;font-weight:800;color:var(--green)}
+.mrow.off .mn>span:first-child,.mrow.off .mp{opacity:.4;text-decoration:line-through}
+.sw{width:52px;height:30px;border-radius:15px;background:var(--line2);position:relative;flex-shrink:0;display:inline-block;transition:background .15s}
+.sw i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .15s}
+.sw.on{background:var(--green)}.sw.on i{left:25px}
+.sw.part{background:var(--accent)}
+.badge{font-style:normal;font-size:11px;font-weight:800;background:var(--tint);color:var(--green-d);padding:2px 6px;border-radius:6px;margin-left:8px;vertical-align:2px}
+.emptycat{grid-column:1/-1;padding:24px;color:var(--muted);font-size:17px;line-height:1.5}
+.phone .manage{padding:14px 12px 30px;gap:12px}
+.phone .mhead{flex-direction:column;align-items:stretch}
+.phone .mhead h2{font-size:21px}
+.phone .mrow{gap:10px;padding:10px 12px}
+.phone .mcat-h{padding:10px 12px}
+.phone .catsw{font-size:13px}
 </style>
 </head>
 <body>
@@ -249,6 +275,21 @@ function saveLocal() {
 }
 var ID_RE = /^[a-z0-9][a-z0-9_-]{0,39}$/;
 function uniqueId(base, taken) { base = base || 'article'; var id = base, n = 2; while (taken[id]) id = base + '-' + n++; return id; }
+
+/* Articles désactivés sur cet appareil (menu ⋮ → Gérer le catalogue). Ils restent dans le catalogue
+   mais n'apparaissent plus dans la caisse. Une catégorie sans article actif est masquée. */
+var HID_KEY = STORE_KEY + '-desactives';
+var HID = {};
+try { HID = JSON.parse(localStorage.getItem(HID_KEY)) || {}; } catch (e) { HID = {}; }
+function saveHid() {
+  try { localStorage.setItem(HID_KEY, JSON.stringify(HID)); refreshUsage(); return true; }
+  catch (e) { S.modal = 'storage'; refreshUsage(); return false; }
+}
+function visibleCats() {
+  return CATALOGUE.categories.map(function (k) {
+    return Object.assign({}, k, { produits: k.produits.filter(function (p) { return !HID[p.id]; }) });
+  }).filter(function (k) { return k.produits.length; });
+}
 
 // Vérifie un catalogue et le prépare pour la caisse (filtre "actif", trie par "ordre").
 function normalizeCatalogue(c) {
@@ -411,6 +452,17 @@ var A = {
     if (S.pending && !findPlace(S.pending)) S.pending = null;
     toast(catalogueLabel(CATALOGUE) + ' installé');
   },
+  showManage: function () { S.menu = false; S.cartOpen = false; S.tab = 'gestion'; },
+  toggleItem: function (id) {
+    if (HID[id]) delete HID[id]; else HID[id] = true;
+    saveHid();
+  },
+  toggleCat: function (cid) {
+    var k = CATALOGUE.categories.filter(function (c) { return c.id === cid; })[0]; if (!k) return;
+    var anyOn = k.produits.some(function (p) { return !HID[p.id]; });
+    k.produits.forEach(function (p) { if (anyOn) HID[p.id] = true; else delete HID[p.id]; });
+    saveHid();
+  },
   openAddCat: function () {
     S.menu = false; S.modal = 'addcat'; S.naCat = S.cat; S.naCatName = ''; S.naCatId = ''; S.naLabel = ''; S.naPrice = ''; S.naId = ''; S.naDone = null; S.naDel = null;
   },
@@ -564,10 +616,12 @@ function vImport() {
 }
 
 function vCaisse() {
-  var cat = CATALOGUE.categories.filter(function (c) { return c.id === S.cat; })[0];
+  var CATS = visibleCats();
+  var cat = CATS.filter(function (c) { return c.id === S.cat; })[0] || CATS[0] || { nom: '', produits: [] };
   var html = '<div class="body"><div class="catalog"><div class="cats">' +
-    CATALOGUE.categories.map(function (c) { return '<button class="cat' + (c.id === S.cat ? ' on' : '') + '" data-a="cat" data-v="' + c.id + '">' + esc(c.nom) + '</button>'; }).join('') +
+    CATS.map(function (c) { return '<button class="cat' + (c.id === cat.id ? ' on' : '') + '" data-a="cat" data-v="' + c.id + '">' + esc(c.nom) + '</button>'; }).join('') +
     '<button class="free" data-a="openFree">+ Article libre</button></div><div class="products">' +
+    (CATS.length ? '' : '<div class="emptycat">Aucun article actif. Réactivez-en dans <strong>⋮ → Gérer le catalogue</strong>.</div>') +
     cat.produits.map(function (p) {
       return '<button class="prod" data-a="add" data-v="' + p.id + '"><div style="display:flex;flex-direction:column;gap:2px"><span class="m">' + esc(p.libelle) + '</span><span class="s">' + esc(cat.nom) + '</span></div><span class="p">' + money(p.prix) + '</span></button>';
     }).join('') + '</div></div>';
@@ -607,14 +661,14 @@ function vHist() {
   return html + '</div></div>';
 }
 
-function vMenu() { return (S.menu ? '<div class="menu"><button data-a="download">Exporter / partager les ventes du jour</button><button data-a="showJson">Voir le fichier JSON du jour</button><button data-a="showDays">Ventes des jours précédents</button><button data-a="openAddCat">Ajouter un article au catalogue</button><button data-a="goHome">Retour à l\'accueil</button><div class="meta">' + catalogueLabel(CATALOGUE) + '</div></div>' : ''); }
+function vMenu() { return (S.menu ? '<div class="menu"><button data-a="download">Exporter / partager les ventes du jour</button><button data-a="showJson">Voir le fichier JSON du jour</button><button data-a="showDays">Ventes des jours précédents</button><button data-a="openAddCat">Ajouter un article au catalogue</button><button data-a="showManage">Gérer le catalogue (activer / désactiver)</button><button data-a="goHome">Retour à l\'accueil</button><div class="meta">' + catalogueLabel(CATALOGUE) + '</div></div>' : ''); }
 function vPosPhone(d, p) {
   return '<div class="full"><div class="header"><img src="' + LOGO_TEXT + '" alt="Chlorophylle Night"><div style="flex:1"></div>' +
     '<button class="iconbtn" data-a="toggleTheme" aria-label="' + (isDark() ? 'Mode clair' : 'Mode sombre') + '">' + (isDark() ? ICON_SUN : ICON_MOON) + '</button>' +
     '<button class="iconbtn" data-a="toggleMenu" aria-label="Menu">' + ICON_DOTS + '</button></div>' +
     '<div class="subbar"><div class="seg"><button class="' + (S.tab === 'caisse' ? 'on' : '') + '" data-a="tab" data-v="caisse">Caisse</button><button class="' + (S.tab === 'hist' ? 'on' : '') + '" data-a="tab" data-v="hist">Historique</button></div>' +
     '<div class="place">' + ICON_PIN + '<span>' + esc(p ? p.nom : '') + '<br>' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + '</span></div></div>' +
-    vStorageBar() + (S.tab === 'caisse' ? vCaisse() : vHist()) + '</div>' +
+    vStorageBar() + (S.tab === 'caisse' ? vCaisse() : S.tab === 'gestion' ? vManage() : vHist()) + '</div>' +
     vMenu();
 }
 
@@ -625,7 +679,7 @@ function vPos() {
     '<div class="seg"><button class="' + (S.tab === 'caisse' ? 'on' : '') + '" data-a="tab" data-v="caisse">Caisse</button><button class="' + (S.tab === 'hist' ? 'on' : '') + '" data-a="tab" data-v="hist">Historique</button></div>' +
     '<div style="flex:1"></div><div class="place">' + ICON_PIN + '<span>' + esc(p ? p.nom : '') + ' · ' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + '</span></div>' +
     '<button class="iconbtn" data-a="toggleTheme" aria-label="' + (isDark() ? 'Mode clair' : 'Mode sombre') + '">' + (isDark() ? ICON_SUN : ICON_MOON) + '</button>' + '<button class="iconbtn" data-a="toggleMenu" aria-label="Menu">' + ICON_DOTS + '</button></div>' +
-    vStorageBar() + (S.tab === 'caisse' ? vCaisse() : vHist()) + '</div>' +
+    vStorageBar() + (S.tab === 'caisse' ? vCaisse() : S.tab === 'gestion' ? vManage() : vHist()) + '</div>' +
     vMenu();
 }
 
@@ -681,6 +735,30 @@ function vAddCat() {
         : '<button class="btn btn-danger" data-a="askDelItem" data-v="' + esc(lp.id) + '">Supprimer</button>') + '</div>';
   }).join('');
   return html + '</div></div>';
+}
+
+function vManage() {
+  var total = 0, on = 0;
+  CATALOGUE.categories.forEach(function (k) { k.produits.forEach(function (p) { total++; if (!HID[p.id]) on++; }); });
+  var html = '<div class="manage"><div class="mhead"><div><h2>Catalogue de l\u2019appareil</h2>' +
+    '<div class="sub"><strong>' + on + '</strong> article' + (on > 1 ? 's' : '') + ' actif' + (on > 1 ? 's' : '') + ' sur ' + total + '. Touchez un article pour l\u2019activer ou le désactiver. ' +
+    'Un article désactivé n\u2019apparaît plus dans la caisse de cet appareil ; il reste dans le catalogue et peut être réactivé à tout moment.</div></div>' +
+    '<button class="btn" data-a="tab" data-v="caisse">← Retour à la caisse</button></div>';
+  CATALOGUE.categories.forEach(function (k) {
+    var n = k.produits.filter(function (p) { return !HID[p.id]; }).length, all = n === k.produits.length;
+    html += '<section class="mcat"><div class="mcat-h"><div class="mct"><strong>' + esc(k.nom) + '</strong><span class="sub">' +
+      (n ? n + ' / ' + k.produits.length + ' actif' + (n > 1 ? 's' : '') : 'catégorie masquée dans la caisse') + '</span></div>' +
+      '<button class="catsw" data-a="toggleCat" data-v="' + esc(k.id) + '">' + (n ? 'Tout désactiver' : 'Tout activer') +
+      '<span class="sw' + (n ? ' on' : '') + (n && !all ? ' part' : '') + '" role="switch" aria-checked="' + (n > 0) + '"><i></i></span></button></div>';
+    k.produits.forEach(function (p) {
+      var act = !HID[p.id];
+      html += '<button class="mrow' + (act ? '' : ' off') + '" data-a="toggleItem" data-v="' + esc(p.id) + '" role="switch" aria-checked="' + act + '">' +
+        '<span class="mn"><span>' + esc(p.libelle) + (p.local ? '<em class="badge">ajouté ici</em>' : '') + '</span><span class="mid">ID ' + esc(p.id) + '</span></span>' +
+        '<span class="mp">' + money(p.prix) + '</span><span class="sw' + (act ? ' on' : '') + '"><i></i></span></button>';
+    });
+    html += '</section>';
+  });
+  return html + '</div>';
 }
 
 function vFree() {
