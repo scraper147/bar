@@ -591,6 +591,17 @@ var A = {
     S.exported[date] = true; persist();
     S.menu = false; toast(name + ' téléchargé');
   },
+  exportSettings: function () {
+    S.menu = false;
+    var f = settingsFile(), n = f.articlesAjoutes.length + f.prixModifies.length + f.articlesDesactives.length;
+    if (!n) { toast('Aucune modification du catalogue sur cet appareil'); return; }
+    var pl = CATALOGUE.pointsDeVente.filter(function (x) { return x.id === S.placeId; })[0];
+    var name = 'reglages_' + today() + (pl ? '_' + slug(pl.nom) : '') + '.json';
+    var blob = new Blob([JSON.stringify(f, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    toast(name + ' téléchargé (' + n + ' modification' + (n > 1 ? 's' : '') + ')');
+  },
   showDays: function () { S.menu = false; S.modal = 'days'; S.confirmDel = null; S.storageMsg = ''; },
   askDel: function (d) { S.confirmDel = d; },
   delDay: function (d) {
@@ -749,7 +760,7 @@ function vHist() {
   return html + '</div></div>';
 }
 
-function vMenu() { return (S.menu ? '<div class="menu"><button data-a="download">Exporter / partager les ventes du jour</button><button data-a="showJson">Voir le fichier JSON du jour</button><button data-a="showDays">Ventes des jours précédents</button><button data-a="openAddCat">Ajouter un article au catalogue</button><button data-a="showManage">Gérer le catalogue (activer / désactiver)</button><button data-a="goHome">Retour à l\'accueil</button><div class="meta">' + catalogueLabel(CATALOGUE) + '</div></div>' : ''); }
+function vMenu() { return (S.menu ? '<div class="menu"><button data-a="download">Exporter / partager les ventes du jour</button><button data-a="showJson">Voir le fichier JSON du jour</button><button data-a="showDays">Ventes des jours précédents</button><button data-a="openAddCat">Ajouter un article au catalogue</button><button data-a="showManage">Gérer le catalogue (activer / désactiver)</button><button data-a="exportSettings">Exporter les modifications du catalogue</button><button data-a="goHome">Retour à l\'accueil</button><div class="meta">' + catalogueLabel(CATALOGUE) + '</div></div>' : ''); }
 function vPosPhone(d, p) {
   return '<div class="full"><div class="header"><img src="' + LOGO_TEXT + '" alt="Chlorophylle Night"><div style="flex:1"></div>' +
     '<button class="iconbtn" data-a="toggleTheme" aria-label="' + (isDark() ? 'Mode clair' : 'Mode sombre') + '">' + (isDark() ? ICON_SUN : ICON_MOON) + '</button>' +
@@ -879,6 +890,23 @@ function vManage() {
     html += '</section>';
   });
   return html + '</div>';
+}
+
+/* Fichier des modifications du catalogue faites sur cet appareil */
+function settingsFile() {
+  var all = allProductIds(), pl = CATALOGUE.pointsDeVente.filter(function (x) { return x.id === S.placeId; })[0];
+  function catOf(id) { var k = CATALOGUE.categories.filter(function (c) { return c.produits.some(function (p) { return p.id === id; }); })[0]; return k ? { id: k.id, nom: k.nom } : null; }
+  return {
+    format: 'caisse-bar/reglages', formatVersion: 1,
+    exporte: isoLocal(new Date()),
+    pointDeVente: pl ? { id: pl.id, nom: pl.nom } : null,
+    catalogueVersion: CATALOGUE.version,
+    articlesAjoutes: LOCAL.produits.map(function (lp) { return { id: lp.id, categorie: { id: lp.cat.id, nom: lp.cat.nom }, libelle: lp.libelle, prix: lp.prix, cree: lp.cree || null }; }),
+    prixModifies: Object.keys(PRICES).map(function (id) { var p = all[id];
+      return { id: id, libelle: p ? p.libelle : null, categorie: catOf(id), prixCatalogue: p ? p.prixCatalogue : null, prix: PRICES[id] }; }),
+    articlesDesactives: Object.keys(HID).filter(function (id) { return HID[id]; }).map(function (id) { var p = all[id];
+      return { id: id, libelle: p ? p.libelle : null, categorie: catOf(id) }; })
+  };
 }
 
 function vFree() {
