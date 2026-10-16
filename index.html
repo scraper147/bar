@@ -228,6 +228,13 @@ pre.json{flex:1;margin:0;overflow:auto;background:#151B12;color:#E4EBDC;border-r
 .phone .mrow{gap:10px;padding:10px 12px}
 .phone .mcat-h{padding:10px 12px}
 .phone .catsw{font-size:13px}
+.mtog{border:none;background:none;font:inherit;color:inherit;text-align:left;padding:0;cursor:pointer;min-height:44px;display:flex;align-items:center;min-width:0}
+.mrow .mp{display:flex;flex-direction:column;align-items:flex-end;gap:1px;border:1px solid var(--line2);border-radius:10px;background:var(--surface);padding:6px 10px;font:inherit;font-size:17px;font-weight:800;color:var(--green);cursor:pointer}
+.mrow .mp>span{display:flex;align-items:center;gap:6px}
+.mrow .mp svg{color:var(--muted)}
+.mrow .mp small{font-size:11px;font-weight:600;color:var(--muted)}
+.mrow .mp.mod{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.mrow{cursor:default}
 </style>
 </head>
 <body>
@@ -265,7 +272,7 @@ function rebuildCatalogue() {
     var keep = {}; LOCAL.produits.forEach(function (lp) { keep[lp.id] = 1; });
     CATALOGUE.categories.forEach(function (k) { k.produits = k.produits.filter(function (p) { return !p.local || keep[p.id]; }); });
     CATALOGUE.categories = CATALOGUE.categories.filter(function (k) { return k.produits.length; });
-    withLocal(CATALOGUE);
+    applyPrices(withLocal(CATALOGUE));
   }
   if (!CATALOGUE.categories.some(function (k) { return k.id === S.cat; })) S.cat = CATALOGUE.categories[0].id;
 }
@@ -289,6 +296,23 @@ function visibleCats() {
   return CATALOGUE.categories.map(function (k) {
     return Object.assign({}, k, { produits: k.produits.filter(function (p) { return !HID[p.id]; }) });
   }).filter(function (k) { return k.produits.length; });
+}
+
+/* Prix modifiés sur cet appareil (Gérer le catalogue → toucher un prix). Ils remplacent le prix du catalogue
+   pour les prochaines ventes et restent valables après une mise à jour de catalogue.json. */
+var PX_KEY = STORE_KEY + '-prix';
+var PRICES = {};
+try { PRICES = JSON.parse(localStorage.getItem(PX_KEY)) || {}; } catch (e) { PRICES = {}; }
+function savePrices() {
+  try { localStorage.setItem(PX_KEY, JSON.stringify(PRICES)); refreshUsage(); return true; }
+  catch (e) { S.modal = 'storage'; refreshUsage(); return false; }
+}
+function applyPrices(cat) {
+  cat.categories.forEach(function (k) { k.produits.forEach(function (p) {
+    if (p.prixCatalogue === undefined) p.prixCatalogue = p.prix;
+    p.prix = PRICES[p.id] != null ? PRICES[p.id] : p.prixCatalogue;
+  }); });
+  return cat;
 }
 
 // Vérifie un catalogue et le prépare pour la caisse (filtre "actif", trie par "ordre").
@@ -316,7 +340,7 @@ function normalizeCatalogue(c) {
   }).filter(function (k) { return k.produits.length; });
   if (!pdv.length) throw new Error('Aucun point de vente actif.');
   if (!cats.length) throw new Error('Aucun produit actif.');
-  return withLocal({ version: Number(c.version) || 0, date: String(c.date || ''), exemple: !!c.exemple, pointsDeVente: pdv, categories: cats });
+  return applyPrices(withLocal({ version: Number(c.version) || 0, date: String(c.date || ''), exemple: !!c.exemple, pointsDeVente: pdv, categories: cats }));
 }
 var CATALOGUE;
 try { CATALOGUE = normalizeCatalogue(JSON.parse(localStorage.getItem(CAT_KEY))); } catch (e) { CATALOGUE = null; }
@@ -423,7 +447,7 @@ var A = {
   add: function (pid) {
     var c, it;
     CATALOGUE.categories.forEach(function (k) { k.produits.forEach(function (p) { if (p.id === pid) { c = k; it = p; } }); });
-    var i = S.cart.findIndex(function (l) { return l.produitId === pid; });
+    var i = S.cart.findIndex(function (l) { return l.produitId === pid && l.price === it.prix; });
     if (i >= 0) S.cart[i].qty++;
     else S.cart.push({ produitId: pid, categorie: c.nom, name: c.prefixe ? c.nom + ' ' + it.libelle : it.libelle, price: it.prix, qty: 1, disc: null });
   },
@@ -451,6 +475,24 @@ var A = {
     if (S.placeId && !findPlace(S.placeId)) { S.placeId = null; S.pending = null; persist(); }
     if (S.pending && !findPlace(S.pending)) S.pending = null;
     toast(catalogueLabel(CATALOGUE) + ' installé');
+  },
+  openPrice: function (id) {
+    var p = allProductIds()[id]; if (!p) return;
+    S.modal = 'price'; S.pxId = id; S.pxVal = String(p.prix).replace('.', ',');
+  },
+  savePrice: function () {
+    var p = allProductIds()[S.pxId], v = r2(num(S.pxVal)); if (!p || !(v > 0)) return;
+    var old = PRICES[S.pxId];
+    if (v === p.prixCatalogue) delete PRICES[S.pxId]; else PRICES[S.pxId] = v;
+    if (!savePrices()) { if (old == null) delete PRICES[S.pxId]; else PRICES[S.pxId] = old; return; }
+    applyPrices(CATALOGUE); S.modal = null;
+    toast('Prix de « ' + p.libelle + ' » : ' + money(v));
+  },
+  resetPrice: function () {
+    var p = allProductIds()[S.pxId]; if (!p) return;
+    delete PRICES[S.pxId]; if (!savePrices()) return;
+    applyPrices(CATALOGUE); S.modal = null;
+    toast('« ' + p.libelle + ' » revient au prix du catalogue : ' + money(p.prixCatalogue));
   },
   showManage: function () { S.menu = false; S.cartOpen = false; S.tab = 'gestion'; },
   toggleItem: function (id) {
@@ -541,6 +583,7 @@ var THEME_KEY = STORE_KEY + '-theme';
 function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
 function applyTheme(t) { document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light'); }
 try { applyTheme(localStorage.getItem(THEME_KEY)); } catch (e) { applyTheme('light'); }
+var ICON_PEN = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
 var ICON_DOTS = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>';
 
 function vHome() {
@@ -737,11 +780,25 @@ function vAddCat() {
   return html + '</div></div>';
 }
 
+function vPrice() {
+  var p = allProductIds()[S.pxId]; if (!p) return '';
+  var v = r2(num(S.pxVal)), ok = v > 0, mod = p.prix !== p.prixCatalogue;
+  return '<div class="overlay"><div class="modal" style="width:min(520px,96vw)"><h2>Modifier le prix</h2>' +
+    '<div style="display:flex;flex-direction:column;gap:2px"><strong style="font-size:19px">' + esc(p.libelle) + '</strong>' +
+    '<span class="sub">ID ' + esc(p.id) + ' · prix du catalogue : ' + money(p.prixCatalogue) + (mod ? ' · prix actuel : ' + money(p.prix) : '') + '</span></div>' +
+    '<label class="f">Nouveau prix (€)<input type="text" inputmode="decimal" data-f="pxVal" value="' + esc(S.pxVal || '') + '" placeholder="0,00" autocomplete="off"></label>' +
+    (S.pxVal && !ok ? '<div class="sub" style="color:var(--red);font-weight:700">Indiquez un prix supérieur à 0.</div>' : '') +
+    '<div class="sub">Le nouveau prix s\u2019applique aux prochaines ventes de cet appareil. Les ventes déjà faites et le panier en cours ne changent pas.</div>' +
+    '<div class="actions stack"><button class="btn" data-a="close">Annuler</button>' +
+    (mod ? '<button class="btn" data-a="resetPrice">Revenir au prix du catalogue</button>' : '') +
+    '<button class="btn btn-primary" data-a="savePrice"' + (ok ? '' : ' disabled') + '>Enregistrer</button></div></div></div>';
+}
+
 function vManage() {
   var total = 0, on = 0;
   CATALOGUE.categories.forEach(function (k) { k.produits.forEach(function (p) { total++; if (!HID[p.id]) on++; }); });
   var html = '<div class="manage"><div class="mhead"><div><h2>Catalogue de l\u2019appareil</h2>' +
-    '<div class="sub"><strong>' + on + '</strong> article' + (on > 1 ? 's' : '') + ' actif' + (on > 1 ? 's' : '') + ' sur ' + total + '. Touchez un article pour l\u2019activer ou le désactiver. ' +
+    '<div class="sub"><strong>' + on + '</strong> article' + (on > 1 ? 's' : '') + ' actif' + (on > 1 ? 's' : '') + ' sur ' + total + '. Touchez un article pour l\u2019activer ou le désactiver, ou son prix pour le modifier. ' +
     'Un article désactivé n\u2019apparaît plus dans la caisse de cet appareil ; il reste dans le catalogue et peut être réactivé à tout moment.</div></div>' +
     '<button class="btn" data-a="tab" data-v="caisse">← Retour à la caisse</button></div>';
   CATALOGUE.categories.forEach(function (k) {
@@ -752,9 +809,12 @@ function vManage() {
       '<span class="sw' + (n ? ' on' : '') + (n && !all ? ' part' : '') + '" role="switch" aria-checked="' + (n > 0) + '"><i></i></span></button></div>';
     k.produits.forEach(function (p) {
       var act = !HID[p.id];
-      html += '<button class="mrow' + (act ? '' : ' off') + '" data-a="toggleItem" data-v="' + esc(p.id) + '" role="switch" aria-checked="' + act + '">' +
-        '<span class="mn"><span>' + esc(p.libelle) + (p.local ? '<em class="badge">ajouté ici</em>' : '') + '</span><span class="mid">ID ' + esc(p.id) + '</span></span>' +
-        '<span class="mp">' + money(p.prix) + '</span><span class="sw' + (act ? ' on' : '') + '"><i></i></span></button>';
+      var mod = p.prix !== p.prixCatalogue;
+      html += '<div class="mrow' + (act ? '' : ' off') + '">' +
+        '<button class="mtog" data-a="toggleItem" data-v="' + esc(p.id) + '"><span class="mn"><span>' + esc(p.libelle) + (p.local ? '<em class="badge">ajouté ici</em>' : '') + '</span><span class="mid">ID ' + esc(p.id) + '</span></span></button>' +
+        '<button class="mp' + (mod ? ' mod' : '') + '" data-a="openPrice" data-v="' + esc(p.id) + '" aria-label="Modifier le prix de ' + esc(p.libelle) + '"><span>' + money(p.prix) + ICON_PEN + '</span>' +
+          (mod ? '<small>catalogue : ' + money(p.prixCatalogue) + '</small>' : '') + '</button>' +
+        '<button class="mtog" data-a="toggleItem" data-v="' + esc(p.id) + '" role="switch" aria-checked="' + act + '" aria-label="' + (act ? 'Désactiver' : 'Activer') + ' ' + esc(p.libelle) + '"><span class="sw' + (act ? ' on' : '') + '"><i></i></span></button></div>';
     });
     html += '</section>';
   });
@@ -865,6 +925,7 @@ function render() {
   else if (S.modal === 'days') html += vDays();
   else if (S.modal === 'storage') html += vStorage();
   else if (S.modal === 'addcat') html += vAddCat();
+  else if (S.modal === 'price') html += vPrice();
   else if (S.modal === 'import') html += vImport();
   if (S.toast) html += '<div class="toast">' + esc(S.toast) + '</div>';
   app.innerHTML = html;

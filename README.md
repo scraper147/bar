@@ -37,11 +37,12 @@ Menu **⋮ → Ajouter un article au catalogue** : choisir une catégorie (ou en
 - Ces articles sont propres à l'appareil et sont **gardés** lors des mises à jour de `catalogue.json`. Si le catalogue officiel contient un jour le même ID, c'est la version officielle qui est utilisée.
 - Pour corriger une erreur : supprimer l'article dans la même fenêtre, puis le recréer. Les ventes déjà faites ne changent pas.
 
-## Activer / désactiver des articles
+## Activer / désactiver des articles, changer un prix
 
 Menu **⋮ → Gérer le catalogue (activer / désactiver)** : liste de tous les articles par catégorie, avec un interrupteur par article et un « Tout activer / Tout désactiver » par catégorie.
 - Un article désactivé n'apparaît plus dans la caisse ; une catégorie sans article actif est masquée.
 - Le réglage est propre à chaque appareil et reste valable après les mises à jour de `catalogue.json`. Le catalogue lui-même n'est pas modifié.
+- **Changer un prix** : toucher le prix de l'article, saisir le nouveau prix, **Enregistrer**. Le prix d'origine reste affiché (« catalogue : … ») et le bouton **Revenir au prix du catalogue** annule la modification. Le nouveau prix vaut pour les prochaines ventes de cet appareil ; les ventes déjà faites ne changent pas.
 
 ## Tablette ou smartphone
 
@@ -80,7 +81,7 @@ Le bouton **Paramètres de la tablette → Vérifier les mises à jour** force l
 
 Les caisses du compte partagent l'adresse `scraper147.github.io` (caisse sapins dans `/sapin/`, Caisse Bar dans `/bar/`). Pour qu'elles cohabitent :
 - clés de stockage propres : `bar-caisse`, `bar-caisse-catalogue` ;
-- cache hors ligne propre, préfixé `caisse-bar-` (actuellement `caisse-bar-v11`) : une mise à jour de la Caisse Bar ne supprime que ses anciens caches, jamais ceux de la caisse sapins ;
+- cache hors ligne propre, préfixé `caisse-bar-` (actuellement `caisse-bar-v12`) : une mise à jour de la Caisse Bar ne supprime que ses anciens caches, jamais ceux de la caisse sapins ;
 - icône « Caisse Bar », `start_url` et `scope` limités à `./` (le dossier `/bar/`).
 
-Pour une mise à jour, augmentez uniquement le numéro dans `sw.js` (`var CACHE = PREFIX + 'v12';`), sans changer le préfixe.
+Pour une mise à jour, augmentez uniquement le numéro dans `sw.js` (`var CACHE = PREFIX + 'v13';`), sans changer le préfixe.
