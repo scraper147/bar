@@ -1,7 +1,7 @@
 {
   "format": "caisse-bar/catalogue",
   "formatVersion": 1,
-  "version": 11,
+  "version": 12,
   "date": "2026-10-17",
   "pointsDeVente": [
     {
@@ -49,7 +49,7 @@
           "libelle": "Red Bull",
           "prix": 3,
           "ordre": 4,
-          "actif": false
+          "actif": true
         },
         {
           "id": "soft-fanta",
