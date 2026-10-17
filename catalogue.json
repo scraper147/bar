@@ -1,7 +1,7 @@
 {
   "format": "caisse-bar/catalogue",
   "formatVersion": 1,
-  "version": 6,
+  "version": 7,
   "date": "2026-10-17",
   "pointsDeVente": [
     {
@@ -24,24 +24,24 @@
       "prefixe": false,
       "produits": [
         {
-          "id": "soft-eau-plate",
-          "libelle": "Eau plate",
-          "prix": 3,
-          "ordre": 8,
-          "actif": true
-        },
-        {
-          "id": "soft-eau-petillante",
-          "libelle": "Eau pétillante",
-          "prix": 3,
-          "ordre": 9,
-          "actif": true
-        },
-        {
           "id": "soft-coca-cola",
           "libelle": "Coca-Cola",
           "prix": 3,
           "ordre": 1,
+          "actif": true
+        },
+        {
+          "id": "softs-coca-zero",
+          "libelle": "Coca Zero",
+          "prix": 3,
+          "ordre": 2,
+          "actif": true
+        },
+        {
+          "id": "softs-coca-light",
+          "libelle": "Coca light",
+          "prix": 3,
+          "ordre": 3,
           "actif": true
         },
         {
@@ -66,24 +66,17 @@
           "actif": true
         },
         {
-          "id": "soft-ice-tea",
-          "libelle": "Ice Tea",
+          "id": "soft-eau-plate",
+          "libelle": "Eau plate",
           "prix": 3,
           "ordre": 7,
-          "actif": false
-        },
-        {
-          "id": "softs-coca-light",
-          "libelle": "Coca light",
-          "prix": 3,
-          "ordre": 3,
           "actif": true
         },
         {
-          "id": "softs-coca-zero",
-          "libelle": "Coca Zero",
+          "id": "soft-eau-petillante",
+          "libelle": "Eau pétillante",
           "prix": 3,
-          "ordre": 2,
+          "ordre": 8,
           "actif": true
         }
       ]
@@ -110,45 +103,38 @@
           "actif": true
         },
         {
-          "id": "biere-bertinchamps-hiver",
-          "libelle": "Bertinchamps Hiver 8 %",
-          "prix": 3,
-          "ordre": 3,
-          "actif": false
-        },
-        {
           "id": "biere-bertinchamps-passion",
           "libelle": "Bertinchamps Passion 0 %",
           "prix": 6,
-          "ordre": 4,
-          "actif": true
-        },
-        {
-          "id": "biere-desperados",
-          "libelle": "Desperados",
-          "prix": 6,
-          "ordre": 5,
+          "ordre": 3,
           "actif": true
         },
         {
           "id": "bieres-bertinchamps-triple",
           "libelle": "Bertinchamps Triple",
           "prix": 6,
-          "ordre": 6,
+          "ordre": 4,
           "actif": true
         },
         {
           "id": "bieres-bertinchamps-ipa",
           "libelle": "Bertinchamps IPA",
           "prix": 3,
-          "ordre": 7,
+          "ordre": 5,
           "actif": true
         },
         {
           "id": "bieres-bertinchamps-legere",
           "libelle": "Bertinchamps légère",
           "prix": 3,
-          "ordre": 8,
+          "ordre": 6,
+          "actif": true
+        },
+        {
+          "id": "biere-desperados",
+          "libelle": "Desperados",
+          "prix": 6,
+          "ordre": 7,
           "actif": true
         }
       ]
