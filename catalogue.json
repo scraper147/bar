@@ -1,7 +1,7 @@
 {
   "format": "caisse-bar/catalogue",
   "formatVersion": 1,
-  "version": 14,
+  "version": 15,
   "date": "2026-10-17",
   "pointsDeVente": [
     {
@@ -77,6 +77,13 @@
           "libelle": "Eau pétillante",
           "prix": 3,
           "ordre": 8,
+          "actif": true
+        },
+        {
+          "id": "softs-1",
+          "libelle": "Jus d’orange",
+          "prix": 3,
+          "ordre": 9,
           "actif": true
         }
       ]
