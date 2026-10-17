@@ -1,10 +1,11 @@
 {
+  "id": "/bar/",
   "name": "Caisse Bar",
   "short_name": "Caisse Bar",
   "description": "Caisse de vente de boissons, fonctionne hors ligne.",
   "lang": "fr",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/bar/",
+  "scope": "/bar/",
   "display": "fullscreen",
   "orientation": "any",
   "background_color": "#0B0F0B",
