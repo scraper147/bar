@@ -1,7 +1,7 @@
 {
   "format": "caisse-bar/catalogue",
   "formatVersion": 1,
-  "version": 17,
+  "version": 18,
   "date": "2026-10-17",
   "pointsDeVente": [
     {
@@ -84,7 +84,7 @@
           "libelle": "Jus d’orange",
           "prix": 3,
           "ordre": 9,
-          "actif": false
+          "actif": true
         }
       ]
     },
