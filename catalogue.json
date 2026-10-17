@@ -1,7 +1,7 @@
 {
   "format": "caisse-bar/catalogue",
   "formatVersion": 1,
-  "version": 12,
+  "version": 13,
   "date": "2026-10-17",
   "pointsDeVente": [
     {
@@ -117,24 +117,31 @@
           "actif": true
         },
         {
+          "id": "bieres-1",
+          "libelle": "Bertinchamps hivers",
+          "prix": 3,
+          "ordre": 5,
+          "actif": true
+        },
+        {
           "id": "bieres-bertinchamps-ipa",
           "libelle": "Bertinchamps IPA",
           "prix": 3,
-          "ordre": 5,
+          "ordre": 6,
           "actif": true
         },
         {
           "id": "bieres-bertinchamps-legere",
           "libelle": "Bertinchamps légère",
           "prix": 3,
-          "ordre": 6,
+          "ordre": 7,
           "actif": true
         },
         {
           "id": "biere-desperados",
           "libelle": "Desperados",
           "prix": 6,
-          "ordre": 7,
+          "ordre": 8,
           "actif": true
         }
       ]
