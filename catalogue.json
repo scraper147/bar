@@ -1,7 +1,7 @@
 {
   "format": "caisse-bar/catalogue",
   "formatVersion": 1,
-  "version": 9,
+  "version": 10,
   "date": "2026-10-17",
   "pointsDeVente": [
     {
@@ -378,7 +378,6 @@
       "nom": "Nourriture",
       "ordre": 8,
       "actif": true,
-      "prefixe": false,
       "produits": [
         {
           "id": "nourritue-hamburger",
@@ -387,7 +386,8 @@
           "ordre": 1,
           "actif": true
         }
-      ]
+      ],
+      "prefixe": false
     }
   ]
 }
