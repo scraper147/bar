@@ -1,7 +1,7 @@
 {
   "format": "caisse-bar/catalogue",
   "formatVersion": 1,
-  "version": 7,
+  "version": 8,
   "date": "2026-10-17",
   "pointsDeVente": [
     {
@@ -244,7 +244,7 @@
           "libelle": "Bombay Sapphire (verre)",
           "prix": 9,
           "ordre": 7,
-          "actif": true
+          "actif": false
         }
       ]
     },
