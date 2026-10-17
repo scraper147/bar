@@ -1,7 +1,7 @@
 {
   "format": "caisse-bar/catalogue",
   "formatVersion": 1,
-  "version": 15,
+  "version": 16,
   "date": "2026-10-17",
   "pointsDeVente": [
     {
@@ -398,6 +398,13 @@
           "libelle": "Hamburger",
           "prix": 10,
           "ordre": 1,
+          "actif": true
+        },
+        {
+          "id": "nourritu-1",
+          "libelle": "Chips",
+          "prix": 3,
+          "ordre": 2,
           "actif": true
         }
       ],
