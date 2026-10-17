@@ -1,7 +1,7 @@
 {
   "format": "caisse-bar/catalogue",
   "formatVersion": 1,
-  "version": 13,
+  "version": 14,
   "date": "2026-10-17",
   "pointsDeVente": [
     {
@@ -118,7 +118,7 @@
         },
         {
           "id": "bieres-1",
-          "libelle": "Bertinchamps hivers",
+          "libelle": "Bertinchamps Hivers",
           "prix": 3,
           "ordre": 5,
           "actif": true
