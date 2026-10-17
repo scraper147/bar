@@ -1055,7 +1055,8 @@ function loadSiteCatalogue(manual) {
       try { cat = normalizeCatalogue(raw); }
       catch (err) { S.importing = { error: err.message }; S.modal = 'import'; render(); return; }
       if (!CATALOGUE) { installCat(raw, cat); toast(catalogueLabel(cat) + ' installé'); }
-      else if (cat.version !== CATALOGUE.version || cat.exemple !== CATALOGUE.exemple) {
+      else if (cat.version !== CATALOGUE.version || cat.exemple !== CATALOGUE.exemple || JSON.stringify(raw) !== localStorage.getItem(CAT_KEY)) {
+        /* le contenu compte aussi : un ordre ou un prix changé sans changer la version est détecté */
         S.siteUpdate = { raw: raw, cat: cat };
         if (S.screen !== 'pos' && !S.modal) { S.importing = S.siteUpdate; S.modal = 'import'; }
       } else if (manual) toast('Le catalogue est à jour (' + catalogueLabel(CATALOGUE) + ')');

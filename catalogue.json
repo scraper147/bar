@@ -1,8 +1,8 @@
 {
   "format": "caisse-bar/catalogue",
   "formatVersion": 1,
-  "version": 5,
-  "date": "2026-10-16",
+  "version": 6,
+  "date": "2026-10-17",
   "pointsDeVente": [
     {
       "id": "pdv1",
@@ -132,21 +132,21 @@
         },
         {
           "id": "bieres-bertinchamps-triple",
-          "libelle": "Bertinchamps triple",
+          "libelle": "Bertinchamps Triple",
           "prix": 6,
           "ordre": 6,
           "actif": true
         },
         {
           "id": "bieres-bertinchamps-ipa",
-          "libelle": "Bertinchamps Ipa",
+          "libelle": "Bertinchamps IPA",
           "prix": 3,
           "ordre": 7,
           "actif": true
         },
         {
           "id": "bieres-bertinchamps-legere",
-          "libelle": "Bertinchamps legere",
+          "libelle": "Bertinchamps légère",
           "prix": 3,
           "ordre": 8,
           "actif": true
@@ -389,7 +389,7 @@
     },
     {
       "id": "nourritue",
-      "nom": "Nourritue",
+      "nom": "Nourriture",
       "ordre": 8,
       "actif": true,
       "prefixe": false,

@@ -37,6 +37,11 @@ Menu **⋮ → Ajouter un article au catalogue** : choisir une catégorie (ou en
 - Ces articles sont propres à l'appareil et sont **gardés** lors des mises à jour de `catalogue.json`. Si le catalogue officiel contient un jour le même ID, c'est la version officielle qui est utilisée.
 - Pour corriger une erreur : supprimer l'article dans la même fenêtre, puis le recréer. Les ventes déjà faites ne changent pas.
 
+## Modifier catalogue.json à la main
+
+- L'ordre d'affichage suit l'attribut `ordre` : celui des catégories pour les onglets, celui des articles dans chaque catégorie (du plus petit au plus grand).
+- Après avoir déposé le fichier, chaque caisse ouverte avec du réseau propose « Nouveau catalogue disponible » → **Installer**, même si le numéro de `version` n'a pas changé (la caisse compare aussi le contenu). Augmenter la `version` reste conseillé, pour savoir quelle version est installée sur chaque appareil.
+
 ## Exporter le catalogue de l'appareil
 
 Menu **⋮ → Exporter le catalogue (catalogue.json)** : télécharge un `catalogue.json` au même format que celui du dépôt, qui reprend le catalogue installé **avec les modifications faites sur cet appareil** : articles ajoutés (même ID, dans leur catégorie ; une catégorie créée dans l'app est ajoutée à la fin), prix modifiés (deviennent les prix du catalogue) et articles désactivés (`"actif": false`, donc retirés de toutes les caisses). La version est augmentée d'un cran et la date mise à jour.
@@ -94,7 +99,7 @@ Le bouton **Paramètres de la tablette → Vérifier les mises à jour** force l
 
 Les caisses du compte partagent l'adresse `scraper147.github.io` (caisse sapins dans `/sapin/`, Caisse Bar dans `/bar/`). Pour qu'elles cohabitent :
 - clés de stockage propres : `bar-caisse`, `bar-caisse-catalogue` ;
-- cache hors ligne propre, préfixé `caisse-bar-` (actuellement `caisse-bar-v16`) : une mise à jour de la Caisse Bar ne supprime que ses anciens caches, jamais ceux de la caisse sapins ;
+- cache hors ligne propre, préfixé `caisse-bar-` (actuellement `caisse-bar-v17`) : une mise à jour de la Caisse Bar ne supprime que ses anciens caches, jamais ceux de la caisse sapins ;
 - icône « Caisse Bar », `start_url` et `scope` limités à `./` (le dossier `/bar/`).
 
-Pour une mise à jour, augmentez uniquement le numéro dans `sw.js` (`var CACHE = PREFIX + 'v17';`), sans changer le préfixe.
+Pour une mise à jour, augmentez uniquement le numéro dans `sw.js` (`var CACHE = PREFIX + 'v18';`), sans changer le préfixe.
