@@ -39,6 +39,7 @@ Menu **⋮ → Ajouter un article au catalogue** : choisir une catégorie (ou en
 
 ## Modifier catalogue.json à la main
 
+- **Vérifier le catalogue à la demande** : **⋮ → Vérifier le catalogue** (la tuile indique la version installée, ou « Mise à jour disponible » si la caisse en a déjà repéré une). Si le `catalogue.json` en ligne est différent, la fenêtre « Nouveau catalogue disponible » s'ouvre (**Installer** ou **Plus tard** ; le panier en cours est vidé à l'installation). Sinon : « Le catalogue est à jour », ou « Pas de réseau ». La caisse vérifie aussi seule à chaque ouverture, mais pendant le service elle ne propose l'installation que sur demande.
 - L'ordre d'affichage suit l'attribut `ordre` : celui des catégories pour les onglets, celui des articles dans chaque catégorie (du plus petit au plus grand).
 - Après avoir déposé le fichier, chaque caisse ouverte avec du réseau propose « Nouveau catalogue disponible » → **Installer**, même si le numéro de `version` n'a pas changé (la caisse compare aussi le contenu). Augmenter la `version` reste conseillé, pour savoir quelle version est installée sur chaque appareil.
 

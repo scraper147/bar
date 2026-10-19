@@ -603,6 +603,7 @@ var A = {
   removeDisc: function () { if (S.discTarget === 'ticket') S.ticketDisc = null; else S.cart[S.discTarget].disc = null; S.modal = null; },
   close: function () { S.modal = S.modal === 'ghcfg' && S.ghBack ? S.ghBack : null; S.ghBack = null; S.ghPending = null; S.storageMsg = ''; },
   checkCatalogue: function () { loadSiteCatalogue(true); },
+  checkCatMenu: function () { S.menu = false; if (!S.catLoading) loadSiteCatalogue(true); },
   installCatalogue: function () {
     var im = S.importing;
     try { localStorage.setItem(CAT_KEY, JSON.stringify(im.raw)); } catch (e) {}
@@ -894,6 +895,7 @@ var MI = {
   up: '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18H6a4 4 0 0 1-.6-7.96A6 6 0 0 1 17.3 8.5 4.5 4.5 0 0 1 17 18h-1"/><path d="M12 12v8M9 15l3-3 3 3"/></svg>',
   plus: '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg>',
   sliders: '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 7h9M18 7h1M5 17h3M12 17h7"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>',
+  refresh: '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66L20 8"/><path d="M20 3v5h-5"/></svg>',
   home: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg>'
 };
 function vMenu() {
@@ -905,7 +907,8 @@ function vMenu() {
     tile('showDays', MI.cal, 'Ventes des jours précédents', 'Télécharger, envoyer, effacer') +
     (ghReady() ? tile('ghSend', MI.up, S.ghBusy ? 'Envoi en cours…' : 'Envoyer sur GitHub', 'Ventes du jour', S.ghBusy ? ' disabled' : '') : '');
   var catalogue = tile('openAddCat', MI.plus, 'Ajouter un article', 'Au catalogue de cet appareil') +
-    tile('showManage', MI.sliders, 'Gérer le catalogue', 'Activer, désactiver, prix');
+    tile('showManage', MI.sliders, 'Gérer le catalogue', 'Activer, désactiver, prix') +
+    tile('checkCatMenu', MI.refresh, S.catLoading ? 'Vérification…' : 'Vérifier le catalogue', S.siteUpdate ? 'Mise à jour disponible' : 'Installé : v' + CATALOGUE.version, S.siteUpdate ? ' style="border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)"' : '');
   return '<div class="menu-back" data-a="toggleMenu"></div><div class="menu tiles" role="menu">' +
     '<div class="mgroup">Ventes</div><div class="mgrid">' + ventes + '</div>' +
     '<div class="mgroup">Catalogue</div><div class="mgrid">' + catalogue + '</div>' +
@@ -1222,6 +1225,8 @@ function installCat(raw, cat) {
   if (S.placeId && !findPlace(S.placeId)) { S.placeId = null; persist(); }
 }
 function loadSiteCatalogue(manual) {
+  /* hors ligne, le service worker renverrait la copie en cache : on ne peut rien vérifier */
+  if (manual && CATALOGUE && navigator.onLine === false) { toast('Pas de réseau : impossible de vérifier le catalogue'); render(); return; }
   S.catLoading = true; render();
   fetch('catalogue.json?t=' + Date.now(), { cache: 'no-store' })
     .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
@@ -1234,8 +1239,8 @@ function loadSiteCatalogue(manual) {
       else if (cat.version !== CATALOGUE.version || cat.exemple !== CATALOGUE.exemple || JSON.stringify(raw) !== localStorage.getItem(CAT_KEY)) {
         /* le contenu compte aussi : un ordre ou un prix changé sans changer la version est détecté */
         S.siteUpdate = { raw: raw, cat: cat };
-        if (S.screen !== 'pos' && !S.modal) { S.importing = S.siteUpdate; S.modal = 'import'; }
-      } else if (manual) toast('Le catalogue est à jour (' + catalogueLabel(CATALOGUE) + ')');
+        if ((manual || S.screen !== 'pos') && !S.modal) { S.importing = S.siteUpdate; S.modal = 'import'; } // pendant le service : seulement sur demande
+      } else { S.siteUpdate = null; if (manual) toast('Le catalogue est à jour (' + catalogueLabel(CATALOGUE) + ')'); }
       render();
     })
     .catch(function () {
