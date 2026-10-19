@@ -42,11 +42,13 @@ Menu **⋮ → Ajouter un article au catalogue** : choisir une catégorie (ou en
 - L'ordre d'affichage suit l'attribut `ordre` : celui des catégories pour les onglets, celui des articles dans chaque catégorie (du plus petit au plus grand).
 - Après avoir déposé le fichier, chaque caisse ouverte avec du réseau propose « Nouveau catalogue disponible » → **Installer**, même si le numéro de `version` n'a pas changé (la caisse compare aussi le contenu). Augmenter la `version` reste conseillé, pour savoir quelle version est installée sur chaque appareil.
 
-## Exporter le catalogue de l'appareil
+## Envoyer les ventes sur GitHub (facultatif, uniquement sur demande)
 
-Menu **⋮ → Exporter le catalogue (catalogue.json)** : télécharge un `catalogue.json` au même format que celui du dépôt, qui reprend le catalogue installé **avec les modifications faites sur cet appareil** : articles ajoutés (même ID, dans leur catégorie ; une catégorie créée dans l'app est ajoutée à la fin), prix modifiés (deviennent les prix du catalogue) et articles désactivés (`"actif": false`, donc retirés de toutes les caisses). La version est augmentée d'un cran et la date mise à jour.
-
-Pour l'appliquer à tous les appareils : déposer ce fichier à la place de `catalogue.json` dans le dépôt `bar`. Chaque caisse proposera ensuite « Nouveau catalogue disponible » → **Installer**. Un seul appareil à la fois doit faire ses modifications et l'export, sinon le dernier fichier déposé écrase les changements de l'autre.
+Les ventes peuvent être envoyées dans le dépôt **privé** `scraper147/ventes`, **seulement quand on appuie sur un bouton** (jamais automatiquement).
+- Le jeton GitHub des caisses (limité au dépôt `ventes`, droit *Contents : Read and write*) est intégré au code **chiffré** (`CLE_CHIFFREE`, AES-GCM, clé dérivée de la phrase de passe par PBKDF2, même format que l'app admin). Sans la phrase de passe, il est illisible.
+- **Déverrouiller une tablette (une seule fois)** : Paramètres de la tablette → **Envoi des ventes sur GitHub → Déverrouiller**, saisir la phrase de passe des caisses (majuscules et espaces sans importance). La phrase n'est jamais enregistrée ; **Verrouiller cet appareil** efface le jeton de la tablette.
+- **Envoyer** : **⋮ → Envoyer les ventes du jour sur GitHub**, ou **Envoyer sur GitHub / Renvoyer sur GitHub** dans « Ventes des jours précédents » (à côté de **Télécharger**, toujours visible ; si la tablette est verrouillée, la phrase de passe est demandée puis le jour est envoyé). Fichier : `bar/AAAA-MM-JJ_<point de vente>_<nom>_<appareil>.json` (même contenu que l'export) ; l'identifiant de l'appareil évite que deux tablettes du même bar s'écrasent ; un renvoi remplace le fichier de cette tablette pour ce jour. Un jour envoyé compte comme exporté.
+- **Changer de jeton ou de phrase** (tablette perdue, jeton expiré) : créer un nouveau jeton, préparer une nouvelle clé chiffrée dans l'app admin (Paramètres → Préparer la clé chiffrée), la remplacer dans `index.html` (`CLE_CHIFFREE`), monter la version du cache, puis déverrouiller à nouveau les tablettes.
 
 ## Annuler une vente
 
@@ -99,7 +101,7 @@ Le bouton **Paramètres de la tablette → Vérifier les mises à jour** force l
 
 Les caisses du compte partagent l'adresse `scraper147.github.io` (caisse sapins dans `/sapin/`, Caisse Bar dans `/bar/`). Pour qu'elles cohabitent :
 - clés de stockage propres : `bar-caisse`, `bar-caisse-catalogue` ;
-- cache hors ligne propre, préfixé `caisse-bar-` (actuellement `caisse-bar-v17`) : une mise à jour de la Caisse Bar ne supprime que ses anciens caches, jamais ceux de la caisse sapins ;
+- cache hors ligne propre, préfixé `caisse-bar-` (actuellement `caisse-bar-v18`) : une mise à jour de la Caisse Bar ne supprime que ses anciens caches, jamais ceux de la caisse sapins ;
 - icône « Caisse Bar », `start_url` et `scope` limités à `./` (le dossier `/bar/`).
 
-Pour une mise à jour, augmentez uniquement le numéro dans `sw.js` (`var CACHE = PREFIX + 'v18';`), sans changer le préfixe.
+Pour une mise à jour, augmentez uniquement le numéro dans `sw.js` (`var CACHE = PREFIX + 'v19';`), sans changer le préfixe.
