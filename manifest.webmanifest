@@ -1,6 +1,6 @@
 {
-"id": "/bar/",  
-"name": "Caisse Bar",
+  "id": "/bar/",
+  "name": "Caisse Bar",
   "short_name": "Caisse Bar",
   "description": "Caisse de vente de boissons, fonctionne hors ligne.",
   "lang": "fr",
