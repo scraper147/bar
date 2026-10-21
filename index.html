@@ -578,7 +578,7 @@ var A = {
   toggleMenu: function () { S.menu = !S.menu; },
   openCart: function () { S.cartOpen = true; S.menu = false; },
   closeCart: function () { S.cartOpen = false; },
-  toggleTheme: function () { var t = isDark() ? 'light' : 'dark'; applyTheme(t); try { localStorage.setItem(THEME_KEY, t); } catch (e) {} },
+  toggleTheme: function () { var t = isDark() ? 'dark' : 'light'; applyTheme(t); try { localStorage.setItem(THEME_KEY, t); } catch (e) {} },
   cat: function (id) { S.cat = id; },
   add: function (pid) {
     var c, it;
