@@ -5,7 +5,7 @@
 // il ne faut jamais toucher aux caches des autres.
 var PREFIX = 'caisse-bar-';
 var CACHE = PREFIX + 'v18';
-var FILES = ['./', './index.html', './manifest.webmanifest', './catalogue.json',
+var FILES = ['./', './index.html', './manifestBar.webmanifest', './catalogue.json',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png'];
 
 self.addEventListener('install', function (e) {
